@@ -19,16 +19,29 @@
 
 #endif
 
+#define SYMBOLS_OF_SPRITE(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].symbols
+#define SYMBOLS_OF_SPRITE(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].colors
+#define SYMBOLS_OF_SPRITE(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].effects
+
 namespace teco {
+
+// enums
+
+enum {TUI, GUI};
+enum {LOOPING, STOP_ON_FIRST_FRAME, STOP_ON_LAST_FRAME};
 
 // classes
 
 class Source {
 public:
-    std::vector<std::string> symbols;
-    std::vector<std::string> colors;
+    std::vector<char> symbols;
+    std::vector<char> colors;
+	std::vector<char> effects;
 
-    Source(std::string symbols_path, std:string colors_path);
+	int width;
+	int height;
+
+    Source(std::string symbols_path, std:string colors_path, std::string effects_path);
     std::vector<std::string> read_file(std::string file_name);
 };
 
@@ -44,25 +57,45 @@ public:
 
 class Sprite {
 public:
-	
+	std::vector<Animation*> animations;
+	int current_animation_index = 0;
+	int current_animation_frame_index = 0;
 };
 
 class Subscreen {
 public:
-	
+	std::vector<char> symbols;
+	std::vector<char> colors;
+	std::vector<char> effects;	
+
+	int width;
+	int height;
+
+	void (*tick) ();
+	void (*draw) ();
+
+	void clear();
+	void draw_all(int x, int y, std::vector<char> symbols_to_draw, std::vector<char> colors_to_draw, std::vector<char> effects_to_draw);
+	void draw_symbols(int x, int y, std::vector<char> symbols_to_draw);
+	void draw_colors(int x, int y, std::vectgor<char> colors_to_draw);
+	void draw_effects(int x, int y, std::vector<char> effects_to_draw);
 };
 
 class Screen {
 public:
-	
+	std::vector<char> symbols;
+	int width;
+	int height;
+
+	void (*tick) ();
+	void (*draw) ();
+
+	void clear();
+	void draw_all(int x, int y, std::vector<char> symbols_to_draw, std::vector<char> colors_to_draw, std::vector<char> effects_to_draw);
+	void draw_symbols(int x, int y, std::vector<char> symbols_to_draw);
+	void draw_colors(int x, int y, std::vectgor<char> colors_to_draw);
+	void draw_effects(int x, int y, std::vector<char> effects_to_draw);
 };
-
-// consts
-
-// enums
-
-enum {TUI, GUI};
-enum {LOOPING, STOP_ON_FIRST_FRAME, STOP_ON_LAST_FRAME};
 
 // variables
 int window_width;
@@ -77,7 +110,6 @@ int tps;
 
 int graphics_type;
 
-SDL_DisplayMode display_mode;
 SDL_Event event;
 SDL_Renderer *renderer = NULL;
 SDL_Window *window = NULL;
@@ -89,13 +121,15 @@ auto tick_slice = unfduration::zero();
 auto draw_slice = unfduration::zero();
 
 auto last_update_time = unftime();
-auto accumulator = unfduration::zero();
+auto time_accumulator = unfduration::zero();
 
 bool run = true;
 
+Screen* current_screen = NULL;
+
 // functions
 
-void init(int _graphics_type = GUI; int _fps = 60, int _tps = 20, std::string& _title);
+void init(int _graphics_type = GUI; int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width, int _window_height, std::string& _title);
 void mainloop();
 void handle_events_tui();
 void handle_events_gui();
