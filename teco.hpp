@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SDL2/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <vector>
@@ -34,15 +36,15 @@ enum {LOOPING, STOP_ON_FIRST_FRAME, STOP_ON_LAST_FRAME};
 
 class Source {
 public:
-    std::vector<char> symbols;
-    std::vector<char> colors;
-	std::vector<char> effects;
+    std::vector<std::vector<char>> symbols;
+    std::vector<std::vector<char>> colors;
+	std::vector<std::vector<char>> effects;
 
 	int width;
 	int height;
 
     Source(std::string symbols_path, std:string colors_path, std::string effects_path);
-    std::vector<std::string> read_file(std::string file_name);
+    std::vector<std::vector<char>> read_file(std::string file_name);
 };
 
 class Animation {
@@ -58,15 +60,18 @@ public:
 class Sprite {
 public:
 	std::vector<Animation*> animations;
-	int current_animation_index = 0;
-	int current_animation_frame_index = 0;
+
+	int current_animation_index;
+	int current_animation_frame_index;
+
+	Sprite(std::vector<Animation> _animations, int _currrent_animation_index = 0, int _current_animation_frame_index = 0);
 };
 
 class Subscreen {
 public:
-	std::vector<char> symbols;
-	std::vector<char> colors;
-	std::vector<char> effects;	
+	std::vector<std::vector<char>> symbols;
+	std::vector<std::vector<char>> colors;
+	std::vector<std::vector<char>> effects;	
 
 	int width;
 	int height;
@@ -74,71 +79,74 @@ public:
 	void (*tick) ();
 	void (*draw) ();
 
+	Subscreen(int _width, int _height);
 	void clear();
-	void draw_all(int x, int y, std::vector<char> symbols_to_draw, std::vector<char> colors_to_draw, std::vector<char> effects_to_draw);
-	void draw_symbols(int x, int y, std::vector<char> symbols_to_draw);
-	void draw_colors(int x, int y, std::vectgor<char> colors_to_draw);
-	void draw_effects(int x, int y, std::vector<char> effects_to_draw);
+	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
+	void draw_symbols(int x, int y, std::vector<std::vector<char>> symbols_to_draw);
+	void draw_colors(int x, int y, std::vectgor<std::vector<char>> colors_to_draw);
+	void draw_effects(int x, int y, std::vector<std::vector<char>> effects_to_draw);
 };
 
 class Screen {
 public:
-	std::vector<char> symbols;
+	std::vector<std::vector<char>> symbols;
+	std::vector<std::vector<char>> colors;
+	std::vector<std::vector<char>> effects;
+
 	int width;
 	int height;
 
 	void (*tick) ();
 	void (*draw) ();
 
+	Screen(int _width, int _height);
 	void clear();
-	void draw_all(int x, int y, std::vector<char> symbols_to_draw, std::vector<char> colors_to_draw, std::vector<char> effects_to_draw);
-	void draw_symbols(int x, int y, std::vector<char> symbols_to_draw);
-	void draw_colors(int x, int y, std::vectgor<char> colors_to_draw);
-	void draw_effects(int x, int y, std::vector<char> effects_to_draw);
+	void draw_all(int x, int y, std::vector<vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
+	void draw_symbols(int x, int y, std::vector<std::vector<char>> symbols_to_draw);
+	void draw_colors(int x, int y, std::vector<std::vector<char>> colors_to_draw);
+	void draw_effects(int x, int y, std::vector<std::vector<char>> effects_to_draw);
 };
 
 // variables
-int window_width;
-int window_height;
-int window_width_in_symbols;
-int window_height_in_symbols;
 
-std::string title;
+extern int graphics_type;
 
-int fps;
-int tps;
+extern std::string title;
 
-int graphics_type;
+extern int fps;
+extern int tps;
 
-SDL_Event event;
-SDL_Renderer *renderer = NULL;
-SDL_Window *window = NULL;
-SDL_Surface *window_surface = NULL;
+extern int window_width_in_symbols;
+extern int window_height_in_symbols;
+extern int window_width;
+extern int window_height;
 
-std::vector<int> pressed_keys;
+extern SDL_Event event;
+extern SDL_Renderer *renderer;
+extern SDL_Window *window;
+extern SDL_Surface *window_surface;
 
-auto tick_slice = unfduration::zero();
-auto draw_slice = unfduration::zero();
+extern std::vector<int> pressed_keys;
 
-auto last_update_time = unftime();
-auto time_accumulator = unfduration::zero();
+extern unfduration tick_slice;
+extern unfduration draw_slice;
+extern unfduration time_accumulator;
+extern std::chrono::time_point_cast<unfduration> last_update_time;
 
-bool run = true;
+extern bool run;
 
-Screen* current_screen = NULL;
+extern Screen *current_screen;
 
 // functions
 
-void init(int _graphics_type = GUI; int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width, int _window_height, std::string& _title);
+void init(int _graphics_type = GUI; std::string& _title; int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width = 640, int _window_height = 480, Screen *_current_screen);
 void mainloop();
-void handle_events_tui();
 void handle_events_gui();
-void draw_tui();
+void handle_events_tui();
 void draw_gui();
-void playsonds();
+void draw_tui();
+void play_sounds();
 void exit();
-
-bool is_key_pressed(int key);
 
 }
 
