@@ -321,7 +321,31 @@ void teco::handle_events_tui() {
 }
 
 void teco::draw_gui() {
+	SDL_RenderClear(renderer);
 
+	current_screen.draw();
+
+	for (int line = 0; line < current_screen.height; line++) {
+		for (int column = 0; column < current_screen.width; column++) {
+			if (current_screen.symbols[line][column] != ' ') {
+				if (symbol_textures.count(current_screen.symbols[line][column]) == 0) {
+					SDL_Color text_color = {229, 229, 229};
+					SDL_Surface *test_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
+					symbol_textures[current_screen.symbols[line][column]] = SDL_CreateTextureFromSurface(renderer, text_surface);
+                    SDL_FreeSurface(text_surface);
+				}
+
+				SDL_Rect text_rectangle = {
+					column*window_width/current_screen.width,
+					line*window_height/current_screen.height,
+					window_width/current_screen.width,
+					window_height/current_screen.height
+				};
+
+				SDL_RenderCopy(renderer, symbol_textures[current_screen.symbols[line][column]], NULL, &text_rectangle);
+			}
+		}
+	}
 }
 
 void teco::draw_tui() {
