@@ -200,6 +200,7 @@ SDL_Window *window = NULL;
 SDL_Surface *window_surface = NULL;
 
 std::vector<int> pressed_keys;
+std::vector<char, SDL_Texture*> symbol_textures;
 
 unfduration tick_slice = unfduration::zero();
 unfduration draw_slice = unfduration::zero();
@@ -333,6 +334,12 @@ void teco::play_sounds() {
 
 void teco::exit() {
 	run = false;
+
+	for (const auto& [symbol, texture] : symbol_textures) {
+		SDL_DestroyTexture(texture);
+		symbol_textures.erase(symbol);
+	}
+
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

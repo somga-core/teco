@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <vector>
+#include <map>
 #include <iostream>
 #include <chrono>
 #include <string>
@@ -127,6 +128,7 @@ extern SDL_Window *window;
 extern SDL_Surface *window_surface;
 
 extern std::vector<int> pressed_keys;
+extern std::map<char, SDL_Texture*> symbol_textures;
 
 extern unfduration tick_slice;
 extern unfduration draw_slice;
