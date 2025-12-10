@@ -1,16 +1,19 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <SDL/SDL_ttf.h>
+#include <SDL2/SDL_ttf.h> 
 #include <vector>
 #include <map>
 #include <iostream>
+#include <algorithm>
 #include <chrono>
 #include <string>
+#include <fstream>
 
 #define unfduration std::chrono::nanoseconds
 #define second_ratio 1000000000L
-#define unftime() std::chrono::time_point_cast<unfduration>(std::chrono::system_clock::now(    ))
+#define unftimepoint std::enable_if<true, std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::_V2::system_clock::duration>>::type
+#define unftime() std::chrono::time_point_cast<unfduration>(std::chrono::system_clock::now())
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -22,19 +25,17 @@
 
 #endif
 
-#define SYMBOLS_OF_SPRITE(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].symbols
-#define SYMBOLS_OF_SPRITE(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].colors
-#define SYMBOLS_OF_SPRITE(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].effects
+#define SPRITE_SYMBOLS(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].symbols
+#define SPRITE_COLORS(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].colors
+#define SPRITE_EFFECTS(sprite) sprite.animations[sprite.current_animation_index].sources[sprite.current_animation_frame_index].effects
 
 namespace teco {
 
 // enums
-
 enum {TUI, GUI};
 enum {LOOPING, STOP_ON_FIRST_FRAME, STOP_ON_LAST_FRAME};
 
 // classes
-
 class Source {
 public:
     std::vector<std::vector<char>> symbols;
@@ -44,7 +45,7 @@ public:
 	int width;
 	int height;
 
-    Source(std::string symbols_path, std:string colors_path, std::string effects_path);
+    Source(std::string symbols_path, std::string colors_path, std::string effects_path);
     std::vector<std::vector<char>> read_file(std::string file_name);
 };
 
@@ -60,7 +61,7 @@ public:
 
 class Sprite {
 public:
-	std::vector<Animation*> animations;
+	std::vector<Animation> animations;
 
 	int current_animation_index;
 	int current_animation_frame_index;
@@ -83,9 +84,6 @@ public:
 	Subscreen(int _width, int _height);
 	void clear();
 	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
-	void draw_symbols(int x, int y, std::vector<std::vector<char>> symbols_to_draw);
-	void draw_colors(int x, int y, std::vectgor<std::vector<char>> colors_to_draw);
-	void draw_effects(int x, int y, std::vector<std::vector<char>> effects_to_draw);
 };
 
 class Screen {
@@ -100,16 +98,12 @@ public:
 	void (*tick) ();
 	void (*draw) ();
 
-	Screen(int _width, int _height);
+	Screen(int _width, int _height, void (*_tick) (), void (*_draw) ());
 	void clear();
-	void draw_all(int x, int y, std::vector<vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
-	void draw_symbols(int x, int y, std::vector<std::vector<char>> symbols_to_draw);
-	void draw_colors(int x, int y, std::vector<std::vector<char>> colors_to_draw);
-	void draw_effects(int x, int y, std::vector<std::vector<char>> effects_to_draw);
+	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
 };
 
 // variables
-
 extern int graphics_type;
 
 extern std::string title;
@@ -126,6 +120,7 @@ extern SDL_Event event;
 extern SDL_Renderer *renderer;
 extern SDL_Window *window;
 extern SDL_Surface *window_surface;
+extern TTF_Font *font;
 
 extern std::vector<int> pressed_keys;
 extern std::map<char, SDL_Texture*> symbol_textures;
@@ -133,21 +128,27 @@ extern std::map<char, SDL_Texture*> symbol_textures;
 extern unfduration tick_slice;
 extern unfduration draw_slice;
 extern unfduration time_accumulator;
-extern std::chrono::time_point_cast<unfduration> last_update_time;
+extern unftimepoint last_update_time;
 
 extern bool run;
 
 extern Screen *current_screen;
 
 // functions
+void init(Screen *_current_screen = NULL, int _graphics_type = GUI, std::string _title = "TeCo", int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width = 640, int _window_height = 480);
 
-void init(int _graphics_type = GUI; std::string& _title; int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width = 640, int _window_height = 480, Screen *_current_screen);
 void mainloop();
+
 void handle_events_gui();
 void handle_events_tui();
+
 void draw_gui();
 void draw_tui();
+
+void draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw);
+
 void play_sounds();
+
 void exit();
 
 }

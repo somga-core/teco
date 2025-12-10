@@ -1,13 +1,11 @@
 #include "teco.hpp"
 
 // class methods
-
-teco::Source::Source(std::string symbols_path, std:string colors_path, std::string effects_path, int _width) {
-	symbols = read_file(symblos_path);
+teco::Source::Source(std::string symbols_path, std::string colors_path, std::string effects_path) {
+	symbols = read_file(symbols_path);
 	colors = read_file(colors_path);
 	effects = read_file(effects_path);
 
-	width = _width;
 	height = symbols.size();
 }
 
@@ -15,13 +13,11 @@ std::vector<std::vector<char>> teco::Source::read_file(std::string file_name) {
 	std::vector<std::vector<char>> result;
 	std::string line;
 	int line_index = 0;
-	std::ifstream in;
 
-	in.open(file_name);
-
+	std::ifstream in (file_name);
 	if (in.is_open()) {
 		while (std::getline(in, line)) {
-			result.push_back(std::vector<char>);
+			result.push_back(std::vector<char>());
 
 			for (char symbol : line) {
 				result[line_index].push_back(symbol);
@@ -36,13 +32,13 @@ std::vector<std::vector<char>> teco::Source::read_file(std::string file_name) {
 	return result;
 }
 
-teco::Animation::Animation(std::vector<Source> _sources, int _loop_mode = STOP_ON_FIRST_FRAME, int _ticks_per_frame = 2) {
+teco::Animation::Animation(std::vector<Source> _sources, int _loop_mode, int _ticks_per_frame) {
 	sources = _sources;
 	loop_mode = _loop_mode;
 	ticks_per_frame = _ticks_per_frame;
 }
 
-teco::Sprite::Sprite(std::vector<Animation> _animations, int _currrent_animation_index = 0, int _current_animation_frame_index = 0) {
+teco::Sprite::Sprite(std::vector<Animation> _animations, int _current_animation_index, int _current_animation_frame_index) {
 	animations = _animations;
 	current_animation_index = _current_animation_index;
 	current_animation_frame_index = _current_animation_frame_index;
@@ -53,11 +49,11 @@ teco::Subscreen::Subscreen(int _width, int _height) {
 	height = _height;
 
 	for (int line = 0; line < height; line++) {
-		symbols.push_back(std::vector<char>);
+		symbols.push_back(std::vector<char>());
 		symbols.back().resize(width, ' ');
-		colors.push_back(std::vector<char>);
+		colors.push_back(std::vector<char>());
 		colors.back().resize(width, ' ');
-		effects.push_back(std::vector<char>);
+		effects.push_back(std::vector<char>());
 		effects.back().resize(width, ' ');
 	}
 }
@@ -73,57 +69,23 @@ void teco::Subscreen::clear() {
 }
 
 void teco::Subscreen::draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw) {
-	draw_symbols(x, y, symbols_to_draw);
-	draw_colors(x, y, colors_to_draw);
-	draw_effects(x, y, effects_to_draw);
+	draw_chars_on_something(x, y, symbols, symbols_to_draw);
+	draw_chars_on_something(x, y, colors, colors_to_draw);
+	draw_chars_on_something(x, y, effects, effects_to_draw);
 }
 
-void teco::Subscreen::draw_symbols(int x, int y, std::vector<std::vector<char>> symbols_to_draw) {
-	for (int line = 0; line < symbols_to_draw.size(); line++) {
-		if (y+line <= height) {
-			for (int column = 0; column < symbols_to_draw[line].size(); column++) {
-				if (x+column <= width) {
-					symbols[y+line][x+column] = symbols_to_draw[line][column];
-				}
-			}
-		}
-	}
-}
-
-void teco::Subscreen::draw_colors(int x, int y, std::vectgor<std::vector<char>> colors_to_draw) {
-	for (int line = 0; line < colors_to_draw.size(); line++) {
-		if (y+line <= height) {
-			for (int column = 0; column < colors_to_draw[line].size(); column++) {
-				if (x+column <= width) {
-					symbols[y+line][x+column] = colors_to_draw[line][column];
-				}
-			}
-		}
-	}
-}
-
-void teco::Subscreen::draw_effects(int x, int y, std::vector<std::vector<char>> effects_to_draw) {
-	for (int line = 0; line < effects_to_draw.size(); line++) {
-		if (y+line <= height) {
-			for (int column = 0; column < effects_to_draw[line].size(); column++) {
-				if (x+column <= width) {
-					symbols[y+line][x+column] = effects_to_draw[line][column];
-				}
-			}
-		}
-	}
-}
-
-teco::Screen::Screen(int _width, int _height) {
+teco::Screen::Screen(int _width, int _height, void (*_tick) (), void (*_draw) ()) {
 	width = _width;
 	height = _height;
+	tick = _tick;
+	draw = _draw;
 
 	for (int line = 0; line < height; line++) {
-		symbols.push_back(std::vector<char>);
+		symbols.push_back(std::vector<char>());
 		symbols.back().resize(width, ' ');
-		colors.push_back(std::vector<char>);
+		colors.push_back(std::vector<char>());
 		colors.back().resize(width, ' ');
-		effects.push_back(std::vector<char>);
+		effects.push_back(std::vector<char>());
 		effects.back().resize(width, ' ');
 	}
 }
@@ -139,81 +101,44 @@ void teco::Screen::clear() {
 }
 
 void teco::Screen::draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw) {
-	draw_symbols(x, y, symbols_to_draw);
-	draw_colors(x, y, colors_to_draw);
-	draw_effects(x, y, effects_to_draw);
-}
-
-void teco::Screen::draw_symbols(int x, int y, std::vector<std::vector<char>> symbols_to_draw) {
-	for (int line = 0; line < symbols_to_draw.size(); line++) {
-		if (y+line <= height) {
-			for (int column = 0; column < symbols_to_draw[line].size(); column++) {
-				if (x+column <= width) {
-					symbols[y+line][x+column] = symbols_to_draw[line][column];
-				}
-			}
-		}
-	}
-}
-
-void teco::Screen::draw_colors(int x, int y, std::vectgor<std::vector<char>> colors_to_draw) {
-	for (int line = 0; line < colors_to_draw.size(); line++) {
-		if (y+line <= height) {
-			for (int column = 0; column < colors_to_draw[line].size(); column++) {
-				if (x+column <= width) {
-					symbols[y+line][x+column] = colors_to_draw[line][column];
-				}
-			}
-		}
-	}
-}
-
-void teco::Screen::draw_effects(int x, int y, std::vector<std::vector<char>> effects_to_draw) {
-	for (int line = 0; line < effects_to_draw.size(); line++) {
-		if (y+line <= height) {
-			for (int column = 0; column < effects_to_draw[line].size(); column++) {
-				if (x+column <= width) {
-					symbols[y+line][x+column] = effects_to_draw[line][column];
-				}
-			}
-		}
-	}
+	draw_chars_on_something(x, y, symbols, symbols_to_draw);
+	draw_chars_on_something(x, y, colors, colors_to_draw);
+	draw_chars_on_something(x, y, effects, effects_to_draw);
 }
 
 // variables
+int teco::graphics_type;
 
-int graphics type;
+std::string teco::title;
 
-std::string title;
+int teco::fps;
+int teco::tps;
 
-int fps;
-int tps;
+int teco::window_width_in_symbols;
+int teco::window_height_in_symbols;
+int teco::window_width;
+int teco::window_height;
 
-int window_width_in_symbols;
-int window_height_in_symbols;
-int window_width;
-int window_height;
+SDL_Event teco::event;
+SDL_Renderer *teco::renderer = NULL;
+SDL_Window *teco::window = NULL;
+SDL_Surface *teco::window_surface = NULL;
+TTF_Font *teco::font = TTF_OpenFont("./JetBrainsMono-Regular.ttf", 20);
 
-SDL_Event event;
-SDL_Renderer *renderer = NULL;
-SDL_Window *window = NULL;
-SDL_Surface *window_surface = NULL;
+std::vector<int> teco::pressed_keys;
+std::map<char, SDL_Texture*> teco::symbol_textures;
 
-std::vector<int> pressed_keys;
-std::vector<char, SDL_Texture*> symbol_textures;
+unfduration teco::tick_slice = unfduration::zero();
+unfduration teco::draw_slice = unfduration::zero();
+unfduration teco::time_accumulator = unfduration::zero();
+unftimepoint teco::last_update_time = unftime();
 
-unfduration tick_slice = unfduration::zero();
-unfduration draw_slice = unfduration::zero();
-unfduration time_accumulator = unfduration::zero();
-std::chrono::time_point_cast<unfduration> last_update_time = unftime();
+bool teco::run = true;
 
-bool run = true;
-
-Screen *current_screen;
+teco::Screen *teco::current_screen;
 
 // functions
-
-void teco::init(int _graphics_type = GUI; std::string& _title, int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width = 640, int _window_height = 480, Screen *_current_screen) {
+void teco::init(Screen *_current_screen, int _graphics_type, std::string _title, int _fps, int _tps, int _window_width_in_symbols, int _window_height_in_symbols, int _window_width, int _window_height) {
 	graphics_type = _graphics_type;
 
 	title = _title;
@@ -233,19 +158,19 @@ void teco::init(int _graphics_type = GUI; std::string& _title, int _fps = 60, in
 
 	if (graphics_type == GUI) {
 		if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-			std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+	
 			exit();
 		}
 
 		window = SDL_CreateWindow(
-			title,
+			title.c_str(),
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			window_width, window_height,
 			SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
 		);
 
 		if (window == NULL) {
-			std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+	
 			exit();
 		}
 
@@ -255,7 +180,7 @@ void teco::init(int _graphics_type = GUI; std::string& _title, int _fps = 60, in
 		);
 
 		if (renderer == NULL) {
-			std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+	
 			exit();
 		}
 
@@ -268,19 +193,24 @@ void teco::init(int _graphics_type = GUI; std::string& _title, int _fps = 60, in
 }
 
 void teco::mainloop() {
+
 	while (run) {
+
+
 		auto delta_time = unftime() - last_update_time;
 		last_update_time = unftime();
-		time_accumulator += delta_time();
+		time_accumulator += delta_time;
 
 		if (graphics_type == GUI)
 			handle_events_gui();
 
 		else if (graphics_type == TUI)
 			handle_events_tui();
-
+			
 		while (time_accumulator > tick_slice) {
+	
 			current_screen->tick();
+	
 			time_accumulator -= tick_slice;
 		}
 
@@ -321,35 +251,55 @@ void teco::handle_events_tui() {
 }
 
 void teco::draw_gui() {
+
 	SDL_RenderClear(renderer);
 
-	current_screen.draw();
+	current_screen->draw();
 
-	for (int line = 0; line < current_screen.height; line++) {
-		for (int column = 0; column < current_screen.width; column++) {
-			if (current_screen.symbols[line][column] != ' ') {
-				if (symbol_textures.count(current_screen.symbols[line][column]) == 0) {
+	char current_symbol[2];
+	current_symbol[1] = '\0';
+
+
+	for (int line = 0; line < current_screen->height; line++) {
+		for (int column = 0; column < current_screen->width; column++) {
+			if (current_screen->symbols[line][column] != ' ') {
+				if (symbol_textures.count(current_screen->symbols[line][column]) == 0) {
+					current_symbol[0] = current_screen->symbols[line][column];
 					SDL_Color text_color = {229, 229, 229};
-					SDL_Surface *test_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
-					symbol_textures[current_screen.symbols[line][column]] = SDL_CreateTextureFromSurface(renderer, text_surface);
+					SDL_Surface *text_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
+					symbol_textures[current_screen->symbols[line][column]] = SDL_CreateTextureFromSurface(renderer, text_surface);
                     SDL_FreeSurface(text_surface);
 				}
 
 				SDL_Rect text_rectangle = {
-					column*window_width/current_screen.width,
-					line*window_height/current_screen.height,
-					window_width/current_screen.width,
-					window_height/current_screen.height
+					column*window_width/current_screen->width,
+					line*window_height/current_screen->height,
+					window_width/current_screen->width,
+					window_height/current_screen->height
 				};
 
-				SDL_RenderCopy(renderer, symbol_textures[current_screen.symbols[line][column]], NULL, &text_rectangle);
+				SDL_RenderCopy(renderer, symbol_textures[current_screen->symbols[line][column]], NULL, &text_rectangle);
 			}
 		}
 	}
+
+	SDL_RenderPresent(renderer);
 }
 
 void teco::draw_tui() {
 
+}
+
+void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw) {
+	for (int line = 0; line < chars_to_draw.size(); line++) {
+		if (y+line <= something_to_draw_on.size()) {
+			for (int column = 0; column < chars_to_draw[line].size(); column++) {
+				if (x+column <= something_to_draw_on[column].size()) {
+					something_to_draw_on[y+line][x+column] = chars_to_draw[line][column];
+				}
+			}
+		}
+	}
 }
 
 void teco::play_sounds() {
@@ -368,4 +318,3 @@ void teco::exit() {
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
-
