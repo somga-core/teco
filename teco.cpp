@@ -41,6 +41,45 @@ teco::Sprite::Sprite(std::vector<Animation> _animations, int _current_animation_
 	animations = _animations;
 	current_animation_index = _current_animation_index;
 	current_animation_frame_index = _current_animation_frame_index;
+
+	is_playing_animations = true;
+	current_animation_frame_index = 0;
+	current_animation_tick = 0;
+	
+	play_animation(_current_animation_index);
+}
+
+void teco::Sprite::play_animation(int animation_index) {
+	if (animation_index != current_animation_index) {
+		current_animation_index = animation_index;
+		is_playing_animations = true;
+		current_animation_frame_index = 0;
+		current_animation_tick = 0;
+	}
+}
+
+void teco::Sprite::update_animations() {
+	std::cout << is_playing_animations << std::endl;
+	if (is_playing_animations && ++current_animation_tick == animations[current_animation_index].ticks_per_frame) {
+		if (++current_animation_frame_index >= animations[current_animation_index].sources.size()) {
+			switch (animations[current_animation_index].loop_mode) {
+				case LOOPING:
+					current_animation_frame_index = 0;
+					break;
+				case STOP_ON_LAST_FRAME:
+					is_playing_animations = false;
+					current_animation_frame_index--;
+					break;
+				case STOP_ON_FIRST_FRAME:
+					is_playing_animations = false;
+					current_animation_frame_index = 0;
+					break;
+			}
+		}
+	}
+	if (current_animation_tick >= animations[current_animation_index].ticks_per_frame) {
+		current_animation_tick = 0;
+	}
 }
 
 teco::Subscreen::Subscreen(int _width, int _height) {

@@ -65,8 +65,12 @@ public:
 
 	int current_animation_index;
 	int current_animation_frame_index;
+    int current_animation_tick;
+    bool is_playing_animations;
 
 	Sprite(std::vector<Animation> _animations, int _currrent_animation_index = 0, int _current_animation_frame_index = 0);
+	void play_animation(int animation_index);
+	void update_animations();
 };
 
 class Subscreen {
