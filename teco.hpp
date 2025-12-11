@@ -83,6 +83,7 @@ public:
 
 	Subscreen(int _width, int _height);
 	void clear();
+	void draw_sprite(int x, int y, Sprite sprite_to_draw);
 	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
 };
 
@@ -100,6 +101,7 @@ public:
 
 	Screen(int _width, int _height, void (*_tick) (), void (*_draw) ());
 	void clear();
+	void draw_sprite(int x, int y, Sprite sprite_to_draw);
 	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
 };
 
@@ -135,7 +137,7 @@ extern bool run;
 extern Screen *current_screen;
 
 // functions
-void init(Screen *_current_screen = NULL, int _graphics_type = GUI, std::string _title = "TeCo", int _fps = 60, int _tps = 20, int _window_width_in_symbols = 128, int _window_height_in_symbols = 128, int _window_width = 640, int _window_height = 480);
+void init(std::string font_path = "assets/JetBrainsMono-Regular.ttf", int font_size = 20, Screen *_current_screen = NULL, int _graphics_type = GUI, std::string _title = "TeCo", int _fps = 60, int _tps = 20, int _window_width = 640, int _window_height = 480);
 
 void mainloop();
 
