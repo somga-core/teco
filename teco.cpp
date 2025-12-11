@@ -133,7 +133,9 @@ SDL_Surface *teco::window_surface = NULL;
 TTF_Font *teco::font;
 
 std::vector<int> teco::pressed_keys;
-std::map<char, SDL_Texture*> teco::symbol_textures;
+std::map<char, std::map<char, SDL_Texture*>> teco::saved_textures;
+std::map<char, SDL_Color> teco::colors;
+char teco::default_color;
 
 unfduration teco::tick_slice = unfduration::zero();
 unfduration teco::draw_slice = unfduration::zero();
@@ -145,7 +147,7 @@ bool teco::run = true;
 teco::Screen *teco::current_screen;
 
 // functions
-void teco::init(std::string font_path, int font_size, Screen *_current_screen, int _graphics_type, std::string _title, int _fps, int _tps, int _window_width, int _window_height) {
+void teco::init(std::string font_path, int font_size, std::map<char, SDL_Color> _colors, char _default_color, Screen *_current_screen, int _graphics_type, std::string _title, int _fps, int _tps, int _window_width, int _window_height) {
 	graphics_type = _graphics_type;
 
 	title = _title;
@@ -157,6 +159,9 @@ void teco::init(std::string font_path, int font_size, Screen *_current_screen, i
 	window_height = _window_height;
 
 	current_screen = _current_screen;
+
+	colors = _colors;
+	default_color = _default_color;
 	
 	draw_slice = unfduration(second_ratio / fps);
 	tick_slice = unfduration(second_ratio / tps);
@@ -263,11 +268,15 @@ void teco::draw_gui() {
 	for (int line = 0; line < current_screen->height; line++) {
 		for (int column = 0; column < current_screen->width; column++) {
 			if (current_screen->symbols[line][column] != ' ') {
-				if (symbol_textures.count(current_screen->symbols[line][column]) == 0) {
-					current_symbol[0] = current_screen->symbols[line][column];
-					SDL_Color text_color = {229, 229, 229};
-					SDL_Surface *text_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
-					symbol_textures[current_screen->symbols[line][column]] = SDL_CreateTextureFromSurface(renderer, text_surface);
+				current_symbol[0] = current_screen->symbols[line][column];
+				char current_color = current_screen->colors[line][column];
+
+				if (current_color == ' ')
+					current_color = default_color;
+
+				if (saved_textures.count(current_symbol[0]) == 0 || saved_textures[current_symbol[0]].count(current_color) == 0) {
+					SDL_Surface *text_surface = TTF_RenderText_Solid(font, current_symbol, colors[current_color]);
+					saved_textures[current_screen->symbols[line][column]][current_color] = SDL_CreateTextureFromSurface(renderer, text_surface);
                     SDL_FreeSurface(text_surface);
 				}
 
@@ -278,7 +287,7 @@ void teco::draw_gui() {
 					window_height / current_screen->height
 				};
 
-				SDL_RenderCopy(renderer, symbol_textures[current_screen->symbols[line][column]], NULL, &text_rectangle);
+				SDL_RenderCopy(renderer, saved_textures[current_symbol[0]][current_color], NULL, &text_rectangle);
 			}
 		}
 	}
@@ -309,8 +318,10 @@ void teco::play_sounds() {
 void teco::exit() {
 	run = false;
 
-	for (const auto& [symbol, texture] : symbol_textures) {
-		SDL_DestroyTexture(texture);
+	for (const auto& [symbol, colors] : saved_textures) {
+		for (const auto& [color, texture] : colors) {
+			SDL_DestroyTexture(texture);
+	}
 	}
 
 	SDL_DestroyRenderer(renderer);
