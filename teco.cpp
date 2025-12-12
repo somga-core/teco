@@ -39,28 +39,30 @@ teco::Animation::Animation(std::vector<Source> _sources, int _loop_mode, int _ti
 
 teco::Sprite::Sprite(std::vector<Animation> _animations, int _current_animation_index, int _current_animation_frame_index) {
 	animations = _animations;
-	current_animation_index = _current_animation_index;
-	current_animation_frame_index = _current_animation_frame_index;
 
-	is_playing_animations = true;
-	current_animation_frame_index = 0;
-	current_animation_tick = 0;
-	
-	play_animation(_current_animation_index);
+	force_animation(_current_animation_index);
+
+	current_animation_frame_index = _current_animation_frame_index;
 }
 
-void teco::Sprite::play_animation(int animation_index) {
+void teco::Sprite::set_animation(int animation_index) {
 	if (animation_index != current_animation_index) {
-		current_animation_index = animation_index;
-		is_playing_animations = true;
-		current_animation_frame_index = 0;
-		current_animation_tick = 0;
+		force_animation(animation_index);
 	}
 }
 
+void teco::Sprite::force_animation(int animation_index) {
+	current_animation_index = animation_index;
+	is_playing_animations = true;
+	current_animation_frame_index = 0;
+	current_animation_tick = 0;
+}
+
 void teco::Sprite::update_animations() {
-	std::cout << is_playing_animations << std::endl;
-	if (is_playing_animations && ++current_animation_tick == animations[current_animation_index].ticks_per_frame) {
+	if (
+		is_playing_animations && 
+		++current_animation_tick == animations[current_animation_index].ticks_per_frame
+	) {
 		if (++current_animation_frame_index >= animations[current_animation_index].sources.size()) {
 			switch (animations[current_animation_index].loop_mode) {
 				case LOOPING:
@@ -165,6 +167,8 @@ int teco::window_height_in_symbols;
 int teco::window_width;
 int teco::window_height;
 
+int teco::tick_count;
+
 SDL_Event teco::event;
 SDL_Renderer *teco::renderer = NULL;
 SDL_Window *teco::window = NULL;
@@ -172,9 +176,13 @@ SDL_Surface *teco::window_surface = NULL;
 TTF_Font *teco::font;
 
 std::vector<int> teco::pressed_keys;
+
 std::map<char, std::map<char, SDL_Texture*>> teco::saved_textures;
+
 std::map<char, SDL_Color> teco::colors;
 char teco::default_color;
+
+std::map<char, std::vector<float> (*) (int, int, int)> teco::effects;
 
 unfduration teco::tick_slice = unfduration::zero();
 unfduration teco::draw_slice = unfduration::zero();
@@ -186,7 +194,24 @@ bool teco::run = true;
 teco::Screen *teco::current_screen;
 
 // functions
-void teco::init(std::string font_path, int font_size, std::map<char, SDL_Color> _colors, char _default_color, Screen *_current_screen, int _graphics_type, std::string _title, int _fps, int _tps, int _window_width, int _window_height) {
+void teco::init(
+	Screen *_current_screen,
+	int _graphics_type,
+	std::string _title,
+	int _fps,
+	int _tps,
+	int _window_width,
+	int _window_height,
+	std::string font_path,
+	int font_size,
+	std::map<char,
+	std::vector<float> (*) (int, int, int)> effects,
+	std::map<char, SDL_Color> _colors,
+	char _default_color,
+	int background_red, 
+	int background_green,
+	int background_blue
+) {
 	graphics_type = _graphics_type;
 
 	title = _title;
@@ -236,7 +261,7 @@ void teco::init(std::string font_path, int font_size, std::map<char, SDL_Color> 
 
 		font = TTF_OpenFont(font_path.c_str(), font_size);
 		
-		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+		SDL_SetRenderDrawColor(renderer, background_red, background_green, background_blue, 0x00);
 	}
 
 	else if (graphics_type == TUI) {
@@ -256,8 +281,8 @@ void teco::mainloop() {
 			handle_events_tui();
 			
 		while (time_accumulator > tick_slice) {
-	
 			current_screen->tick();
+			tick_count++;
 	
 			time_accumulator -= tick_slice;
 		}
@@ -309,8 +334,9 @@ void teco::draw_gui() {
 			if (current_screen->symbols[line][column] != ' ') {
 				current_symbol[0] = current_screen->symbols[line][column];
 				char current_color = current_screen->colors[line][column];
+				char current_effect = current_screen->effects[line][column];
 
-				if (current_color == ' ')
+				if (current_color == ' ' || colors.count(current_color) == 0)
 					current_color = default_color;
 
 				if (saved_textures.count(current_symbol[0]) == 0 || saved_textures[current_symbol[0]].count(current_color) == 0) {
@@ -322,9 +348,18 @@ void teco::draw_gui() {
 				SDL_Rect text_rectangle = {
 					column * window_width / current_screen->width,
 					line * window_height / current_screen->height,
-					window_width / current_screen->width,
-					window_height / current_screen->height
+					(window_width / current_screen->width),
+					(window_height / current_screen->height)
 				};
+				
+				if (current_effect != ' ' && effects.count(current_effect) >= 1) {
+					std::vector<float> offsets = effects[current_effect](column, line, tick_count);
+				
+					text_rectangle.x += offsets[0] * (window_width / current_screen->width);
+					text_rectangle.y += offsets[1] * (window_height / current_screen->height);
+					text_rectangle.w *= offsets[2];
+					text_rectangle.h *= offsets[3];
+				}
 
 				SDL_RenderCopy(renderer, saved_textures[current_symbol[0]][current_color], NULL, &text_rectangle);
 			}
@@ -343,7 +378,8 @@ void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> 
 		if (y+line <= something_to_draw_on.size()) {
 			for (int column = 0; column < chars_to_draw[line].size(); column++) {
 				if (x+column <= something_to_draw_on[column].size()) {
-					something_to_draw_on[y+line][x+column] = chars_to_draw[line][column];
+					if (chars_to_draw[line][column] != ' ')
+						something_to_draw_on[y+line][x+column] = chars_to_draw[line][column];
 				}
 			}
 		}

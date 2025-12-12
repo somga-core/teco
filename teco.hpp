@@ -69,7 +69,8 @@ public:
     bool is_playing_animations;
 
 	Sprite(std::vector<Animation> _animations, int _currrent_animation_index = 0, int _current_animation_frame_index = 0);
-	void play_animation(int animation_index);
+	void set_animation(int animation_index);
+	void force_animation(int animation_index);
 	void update_animations();
 };
 
@@ -122,6 +123,8 @@ extern int window_height_in_symbols;
 extern int window_width;
 extern int window_height;
 
+extern int tick_count;
+
 extern SDL_Event event;
 extern SDL_Renderer *renderer;
 extern SDL_Window *window;
@@ -129,9 +132,13 @@ extern SDL_Surface *window_surface;
 extern TTF_Font *font;
 
 extern std::vector<int> pressed_keys;
+
 extern std::map<char, std::map<char, SDL_Texture*>> saved_textures;
+
 extern std::map<char, SDL_Color> colors;
 extern char default_color;
+
+extern std::map<char, std::vector<float> (*) (int, int, int)> effects;
 
 extern unfduration tick_slice;
 extern unfduration draw_slice;
@@ -144,8 +151,16 @@ extern Screen *current_screen;
 
 // functions
 void init(
-	std::string font_path = "assets/JetBrainsMono-Regular.ttf",
+	Screen *_current_screen = NULL,
+	int _graphics_type = GUI,
+	std::string _title = "TeCo",
+	int _fps = 60,
+	int _tps = 20, 
+	int _window_width = 640,
+	int _window_height = 480,
+	std::string font_path = "assets/font.ttf",
 	int font_size = 20,
+	std::map<char, std::vector<float> (*) (int, int, int)> effects = std::map<char, std::vector<float> (*) (int, int, int)>(),
 	std::map<char, SDL_Color> _colors = std::map<char, SDL_Color> {
 		{'0', SDL_Color {229,229,229}},
 		{'1', SDL_Color {160,160,160}},
@@ -165,13 +180,9 @@ void init(
 		{'F', SDL_Color {0,0,0}}
 	},
 	char _default_color = '0',
-	Screen *_current_screen = NULL,
-	int _graphics_type = GUI,
-	std::string _title = "TeCo",
-	int _fps = 60,
-	int _tps = 20, 
-	int _window_width = 640,
-	int _window_height = 480
+	int background_red = 0x12,
+	int background_green = 0x12,
+	int background_blue = 0x12
 );
 
 void mainloop();
