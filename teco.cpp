@@ -84,40 +84,6 @@ void teco::Sprite::update_animations() {
 	}
 }
 
-teco::Subscreen::Subscreen(int _width, int _height) {
-	width = _width;
-	height = _height;
-
-	for (int line = 0; line < height; line++) {
-		symbols.push_back(std::vector<char>());
-		symbols.back().resize(width, ' ');
-		colors.push_back(std::vector<char>());
-		colors.back().resize(width, ' ');
-		effects.push_back(std::vector<char>());
-		effects.back().resize(width, ' ');
-	}
-}
-
-void teco::Subscreen::clear() {
-	for (int line = 0; line < height; line++) {
-		for (int column = 0; column < width; column++) {
-			symbols[line][column] = ' ';
-			colors[line][column] = ' ';
-			effects[line][column] = ' ';
-		}
-	} 
-}
-
-void teco::Subscreen::draw_sprite(int x, int y, teco::Sprite sprite_to_draw) {
-	draw_all(x, y, SPRITE_SYMBOLS(sprite_to_draw), SPRITE_COLORS(sprite_to_draw), SPRITE_EFFECTS(sprite_to_draw));
-}
-
-void teco::Subscreen::draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw) {
-	teco::draw_chars_on_something(x, y, symbols, symbols_to_draw);
-	teco::draw_chars_on_something(x, y, colors, colors_to_draw);
-	teco::draw_chars_on_something(x, y, effects, effects_to_draw);
-}
-
 teco::Screen::Screen(int _width, int _height, void (*_tick) (), void (*_draw) ()) {
 	width = _width;
 	height = _height;
@@ -271,7 +237,10 @@ void teco::init(
 	}
 
 	else if (graphics_type == TUI) {
-
+		initscr();
+		noecho();
+		keypad(stdscr, true);
+		nodelay(stdscr, true);
 	}
 }
 
@@ -293,10 +262,12 @@ void teco::mainloop() {
 			time_accumulator -= tick_slice;
 		}
 
-		if (graphics_type == GUI) {
+		current_screen->clear();
+		current_screen->draw();
+
+		if (graphics_type == GUI)
 			draw_gui();
-			play_sounds();
-		}
+
 		else if (graphics_type == TUI)
 			draw_tui();
 
@@ -326,13 +297,11 @@ void teco::handle_events_gui() {
 }
 
 void teco::handle_events_tui() {
+
 }
 
 void teco::draw_gui() {
 	SDL_RenderClear(renderer);
-
-	current_screen->clear();
-	current_screen->draw();
 
 	char current_symbol[2] = " ";
 
@@ -377,7 +346,39 @@ void teco::draw_gui() {
 }
 
 void teco::draw_tui() {
+/*
+	for (int sprite_type_index = 0; sprite_type_index < layer.size(); sprite_type_index++) {
+		for (auto sprite : layer[sprite_type_index]) {
+			auto source = sprite.animations[sprite.current_animation_index].sources[sprite.current_frame];
+			int x = COLS / 2 + sprite.x - (source.symbols[0].size() / 2);
+			int y = LINES / 2 + sprite.y - (source.symbols.size() / 2);
 
+			for (int symbols_line_index = 0; symbols_line_index < source.symbols.size(); symbols_line_index++) {
+				mvprintw(y + symbols_line_index, x, source.symbols[symbols_line_index].c_str());
+			}
+		}
+	}
+*/
+
+	int x;
+	int y;
+
+	getmaxyx(stdscr, y, x);
+
+	if (y >= current_screen->height) {
+		for (int line = 0; line < current_screen->height; line++) {
+			for (int column = 0; column < current_screen->width; column++) {
+				mvprintw(line+(y-current_screen->height)/2, column+(x-current_screen->width)/2, "%c", current_screen->symbols[line][column]);
+			}
+		}
+	}
+
+	else {
+		mvprintw(y/2-13, x/2-1, "Screen resolution is wrong");
+	}
+
+	refresh();
+	clear();
 }
 
 void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw) {
@@ -393,20 +394,21 @@ void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> 
 	}
 }
 
-void teco::play_sounds() {
-
-}
-
 void teco::exit() {
 	run = false;
 
-	for (const auto& [symbol, colors] : saved_textures) {
-		for (const auto& [color, texture] : colors) {
-			SDL_DestroyTexture(texture);
+	if (graphics_type == GUI) {
+		for (const auto& [symbol, colors] : saved_textures) {
+			for (const auto& [color, texture] : colors) {
+				SDL_DestroyTexture(texture);
+			}
 		}
-	}
 
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+		SDL_DestroyRenderer(renderer);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+	}
+	else if (graphics_type == TUI) {
+		endwin();
+	}
 }

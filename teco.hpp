@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h> 
+#include <ncurses.h>
 #include <vector>
 #include <map>
 #include <iostream>
@@ -196,11 +197,9 @@ void handle_events_tui();
 void draw_gui();
 void draw_tui();
 
-void draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw);
-
-void play_sounds();
-
 void exit();
+
+void draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw);
 
 }
 

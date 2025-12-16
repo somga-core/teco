@@ -29,7 +29,7 @@ teco::Sprite test_sprite = teco::Sprite(
 
 int main(int argc, char const *argv[])
 {
-    teco::init(&mein_screen);
+    teco::init(&mein_screen, teco::TUI);
 
     teco::effects['#'] = wave_effect;
     teco::effects['&'] = squish_effect;
