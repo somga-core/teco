@@ -175,7 +175,7 @@ SDL_Window *teco::window = NULL;
 SDL_Surface *teco::window_surface = NULL;
 TTF_Font *teco::font;
 
-std::vector<int> teco::pressed_keys;
+std::vector<char> teco::pressed_keys;
 
 std::map<char, std::map<char, SDL_Texture*>> teco::saved_textures;
 
@@ -183,6 +183,8 @@ std::map<char, SDL_Color> teco::colors;
 char teco::default_color;
 
 std::map<char, std::vector<float> (*) (int, int, int)> teco::effects;
+
+std::map<int, char> teco::keybinds;
 
 unfduration teco::tick_slice = unfduration::zero();
 unfduration teco::draw_slice = unfduration::zero();
@@ -202,10 +204,10 @@ void teco::init(
 	int _tps,
 	int _window_width,
 	int _window_height,
+	std::map<int, char> _keybinds,
 	std::string font_path,
 	int font_size,
-	std::map<char,
-	std::vector<float> (*) (int, int, int)> effects,
+	std::map<char, std::vector<float> (*) (int, int, int)> _effects,
 	std::map<char, SDL_Color> _colors,
 	char _default_color,
 	int background_red, 
@@ -226,6 +228,10 @@ void teco::init(
 
 	colors = _colors;
 	default_color = _default_color;
+	
+	effects = _effects;
+
+	keybinds = _keybinds;
 	
 	draw_slice = unfduration(second_ratio / fps);
 	tick_slice = unfduration(second_ratio / tps);
@@ -313,18 +319,19 @@ void teco::handle_events_gui() {
 		}
 
 		else if (event.type == SDL_KEYDOWN) {
-			pressed_keys.push_back(event.key.keysym.sym);
+			if (keybinds.count(event.key.keysym.sym) != 0)
+				pressed_keys.push_back(keybinds[event.key.keysym.sym]);
 		}
 	}
 }
 
 void teco::handle_events_tui() {
-
 }
 
 void teco::draw_gui() {
 	SDL_RenderClear(renderer);
 
+	current_screen->clear();
 	current_screen->draw();
 
 	char current_symbol[2] = " ";
@@ -377,7 +384,7 @@ void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> 
 	for (int line = 0; line < chars_to_draw.size(); line++) {
 		if (y+line <= something_to_draw_on.size()) {
 			for (int column = 0; column < chars_to_draw[line].size(); column++) {
-				if (x+column <= something_to_draw_on[column].size()) {
+				if (x+column <= something_to_draw_on[line].size()) {
 					if (chars_to_draw[line][column] != ' ')
 						something_to_draw_on[y+line][x+column] = chars_to_draw[line][column];
 				}
@@ -396,7 +403,7 @@ void teco::exit() {
 	for (const auto& [symbol, colors] : saved_textures) {
 		for (const auto& [color, texture] : colors) {
 			SDL_DestroyTexture(texture);
-	}
+		}
 	}
 
 	SDL_DestroyRenderer(renderer);
