@@ -61,8 +61,8 @@ std::vector<float> wave_effect(int x, int y, int tick_count) {
 };
 
 std::vector<float> squish_effect(int x, int y, int tick_count) {
-    float mult_x = (float) std::abs(std::sin(tick_count / 4.0));
-    float mult_y = (float) std::abs(std::cos(tick_count / 4.0));
+    float mult_x = (float) .5 + std::abs(std::sin(tick_count / 4.0) - 1) / 4;
+    float mult_y = (float) .5 + (std::sin(tick_count / 4.0) + 1) / 4;
 
     return std::vector<float> {
         (1 - mult_x) / 2,
