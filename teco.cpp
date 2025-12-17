@@ -241,6 +241,8 @@ void teco::init(
 
 	else if (graphics_type == TUI) {
 		initscr();
+        curs_set(0);
+        
 		noecho();
 		keypad(stdscr, true);
 		nodelay(stdscr, true);
