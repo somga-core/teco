@@ -29,13 +29,13 @@ teco::Sprite test_sprite = teco::Sprite(
 
 int main(int argc, char const *argv[])
 {
-    teco::init(&mein_screen, teco::TUI);
+    teco::init(&mein_screen, teco::TUI, "z", 60, 20);
 
     teco::effects['#'] = wave_effect;
     teco::effects['&'] = squish_effect;
 
     teco::keybinds = std::map<int, char> {
-        {SDLK_w, 'w'}
+        {'w', 'w'}
     };
 
     animation_switcher = 0;

@@ -126,7 +126,7 @@ extern std::vector<char> pressed_keys;
 
 extern std::map<char, std::map<char, SDL_Texture*>> saved_textures;
 
-extern std::map<char, SDL_Color> colors;
+extern std::map<char, std::vector<unsigned char>> colors;
 extern char default_color;
 
 extern std::map<int, char> keybinds;
@@ -155,23 +155,23 @@ void init(
 	std::string font_path = "assets/font.ttf",
 	int font_size = 20,
 	std::map<char, std::vector<float> (*) (int, int, int)> effects = std::map<char, std::vector<float> (*) (int, int, int)>(),
-	std::map<char, SDL_Color> _colors = std::map<char, SDL_Color> {
-		{'0', SDL_Color {229, 229, 229}},
-		{'1', SDL_Color {160, 160, 160}},
-		{'2', SDL_Color {10, 162, 146}},
-		{'3', SDL_Color {0, 133, 102}},
-		{'4', SDL_Color {165, 89, 177}},
-		{'5', SDL_Color {102, 0, 153}},
-		{'6', SDL_Color {42, 111, 189}},
-		{'7', SDL_Color {19, 68, 125}},
-		{'8', SDL_Color {209, 148, 23}},
-		{'9', SDL_Color {178, 94, 13}},
-		{'A', SDL_Color {135, 173, 0}},
-		{'B', SDL_Color {94, 117, 0}},
-		{'C', SDL_Color {171, 0, 0}},
-		{'D', SDL_Color {127, 0, 31}},
-		{'E', SDL_Color {103, 103, 103}},
-		{'F', SDL_Color {0, 0, 0}}
+	std::map<char, std::vector<unsigned char>> _colors = std::map<char, std::vector<unsigned char>> {
+		{'0', std::vector<unsigned char> {229, 229, 229}},
+		{'1', std::vector<unsigned char> {160, 160, 160}},
+		{'2', std::vector<unsigned char> {10, 162, 146}},
+		{'3', std::vector<unsigned char> {0, 133, 102}},
+		{'4', std::vector<unsigned char> {165, 89, 177}},
+		{'5', std::vector<unsigned char> {102, 0, 153}},
+		{'6', std::vector<unsigned char> {42, 111, 189}},
+		{'7', std::vector<unsigned char> {19, 68, 125}},
+		{'8', std::vector<unsigned char> {209, 148, 23}},
+		{'9', std::vector<unsigned char> {178, 94, 13}},
+		{'A', std::vector<unsigned char> {135, 173, 0}},
+		{'B', std::vector<unsigned char> {94, 117, 0}},
+		{'C', std::vector<unsigned char> {171, 0, 0}},
+		{'D', std::vector<unsigned char> {127, 0, 31}},
+		{'E', std::vector<unsigned char> {103, 103, 103}},
+		{'F', std::vector<unsigned char> {0, 0, 0}}
 	},
 	char _default_color = '0',
 	int background_red = 0x12,

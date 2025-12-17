@@ -148,7 +148,7 @@ std::vector<char> teco::pressed_keys;
 
 std::map<char, std::map<char, SDL_Texture*>> teco::saved_textures;
 
-std::map<char, SDL_Color> teco::colors;
+std::map<char, std::vector<unsigned char>> teco::colors;
 char teco::default_color;
 
 std::map<char, std::vector<float> (*) (int, int, int)> teco::effects;
@@ -177,7 +177,7 @@ void teco::init(
 	std::string font_path,
 	int font_size,
 	std::map<char, std::vector<float> (*) (int, int, int)> _effects,
-	std::map<char, SDL_Color> _colors,
+	std::map<char, std::vector<unsigned char>> _colors,
 	char _default_color,
 	int background_red, 
 	int background_green,
@@ -241,11 +241,25 @@ void teco::init(
 
 	else if (graphics_type == TUI) {
 		initscr();
-        curs_set(0);
+        start_color();
+
+		if (has_colors() == FALSE) {
+			exit();
+		}
         
+		curs_set(0);
 		noecho();
-		keypad(stdscr, true);
-		nodelay(stdscr, true);
+		keypad(stdscr, TRUE);
+		nodelay(stdscr, TRUE);
+
+		if (can_change_color()) {
+			init_color(0, background_red*1000/255, background_green*1000/255, background_blue*1000/255);
+
+			for (const auto& [symbol, color] : colors) {
+				init_color(symbol, color[0]*1000/255, color[1]*1000/255, color[2]*1000/255);
+				init_pair(symbol, symbol, 0);
+			}
+		}
 	}
 }
 
@@ -302,7 +316,9 @@ void teco::handle_events_gui() {
 }
 
 void teco::handle_events_tui() {
-
+	int ch = getch();
+	pressed_keys.push_back(keybinds[ch]);
+	flushinp();
 }
 
 void teco::draw_gui() {
@@ -321,7 +337,8 @@ void teco::draw_gui() {
 					current_color = default_color;
 
 				if (saved_textures.count(current_symbol[0]) == 0 || saved_textures[current_symbol[0]].count(current_color) == 0) {
-					SDL_Surface *text_surface = TTF_RenderText_Solid(font, current_symbol, colors[current_color]);
+					SDL_Color text_color {colors[current_color][0], colors[current_color][1], colors[current_color][2]};
+					SDL_Surface *text_surface = TTF_RenderText_Solid(font, current_symbol, text_color);
 					saved_textures[current_screen->symbols[line][column]][current_color] = SDL_CreateTextureFromSurface(renderer, text_surface);
                     SDL_FreeSurface(text_surface);
 				}
@@ -359,7 +376,10 @@ void teco::draw_tui() {
 	if (y >= current_screen->height) {
 		for (int line = 0; line < current_screen->height; line++) {
 			for (int column = 0; column < current_screen->width; column++) {
+				char current_color = current_screen->colors[line][column];
+				attron(COLOR_PAIR(current_color));
 				mvprintw(line+(y-current_screen->height)/2, column+(x-current_screen->width)/2, "%c", current_screen->symbols[line][column]);
+				attroff(COLOR_PAIR(current_color));
 			}
 		}
 	}
