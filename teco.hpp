@@ -1,3 +1,8 @@
+ ////// ////// ////// //////
+  //   ////   //     //  //
+ //   //     //     //  //
+//   ////// ////// //////
+
 #pragma once
 
 #include <SDL2/SDL.h>
@@ -47,7 +52,8 @@ public:
 	int height;
 
     Source(std::string symbols_path, std::string colors_path, std::string effects_path);
-    std::vector<std::vector<char>> read_file(std::string file_name);
+    Source(std::vector<std::vector<char>> _symbols, std::vector<std::vector<char>> _colors, std::vector<std::vector<char>> _effects);
+    Source(std::vector<std::string> symbol_strings, std::vector<std::string> color_strings, std::vector<std::string> effect_strings);
 };
 
 class Animation {
@@ -75,24 +81,6 @@ public:
 	void update_animations();
 };
 
-class Subscreen {
-public:
-	std::vector<std::vector<char>> symbols;
-	std::vector<std::vector<char>> colors;
-	std::vector<std::vector<char>> effects;	
-
-	int width;
-	int height;
-
-	void (*tick) ();
-	void (*draw) ();
-
-	Subscreen(int _width, int _height);
-	void clear();
-	void draw_sprite(int x, int y, Sprite sprite_to_draw);
-	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
-};
-
 class Screen {
 public:
 	std::vector<std::vector<char>> symbols;
@@ -107,8 +95,10 @@ public:
 
 	Screen(int _width, int _height, void (*_tick) (), void (*_draw) ());
 	void clear();
-	void draw_sprite(int x, int y, Sprite sprite_to_draw);
-	void draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw);
+	void draw_sprite(int x, int y, Sprite& sprite_to_draw);
+	void draw_screen(int x, int y, Screen& screen_to_draw);
+	void draw_char(int x, int y, char symbol_to_draw = ' ', char color_to_draw = ' ', char effect_to_draw = ' ');
+	void draw_all(int x, int y, std::vector<std::vector<char>>& symbols_to_draw, std::vector<std::vector<char>>& colors_to_draw, std::vector<std::vector<char>>& effects_to_draw);
 };
 
 // variables
@@ -152,7 +142,7 @@ extern bool run;
 
 extern Screen *current_screen;
 
-// functions
+// engine functions
 void init(
 	Screen *_current_screen = NULL,
 	int _graphics_type = GUI,
@@ -199,7 +189,11 @@ void draw_tui();
 
 void exit();
 
+// untility functions
 void draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw);
 
-}
+std::vector<std::vector<char>> get_chars_from_file(std::string path);
 
+std::vector<std::vector<char>> get_chars_from_strings(std::vector<std::string> strings);
+
+}

@@ -1,34 +1,27 @@
+ ////// ////// ////// //////
+  //   ////   //     //  //
+ //   //     //     //  //
+//   ////// ////// //////
+
 #include "teco.hpp"
 
 // class methods
 teco::Source::Source(std::string symbols_path, std::string colors_path, std::string effects_path) {
-	symbols = read_file(symbols_path);
-	colors = read_file(colors_path);
-	effects = read_file(effects_path);
+	symbols = teco::get_chars_from_file(symbols_path);
+	colors = teco::get_chars_from_file(colors_path);
+	effects = teco::get_chars_from_file(effects_path);
 }
 
-std::vector<std::vector<char>> teco::Source::read_file(std::string file_name) {
-	std::vector<std::vector<char>> result;
-	std::string line;
-	int line_index = 0;
+teco::Source::Source(std::vector<std::vector<char>> _symbols, std::vector<std::vector<char>> _colors, std::vector<std::vector<char>> _effects) {
+	symbols = _symbols;
+	colors = _colors;
+	effects = _effects;
+}
 
-	std::ifstream in = std::ifstream(file_name);
-
-	if (in.is_open()) {
-		while (std::getline(in, line)) {
-			result.push_back(std::vector<char>());
-
-			for (char symbol : line) {
-				result[line_index].push_back(symbol);
-			}
-
-			line_index++;
-		}
-
-		in.close();
-	}
-
-	return result;
+teco::Source::Source(std::vector<std::string> symbol_strings, std::vector<std::string> color_strings, std::vector<std::string> effect_strings) {
+	symbols = teco::get_chars_from_strings(symbol_strings);
+	colors = teco::get_chars_from_strings(color_strings);
+	effects = teco::get_chars_from_strings(effect_strings);
 }
 
 teco::Animation::Animation(std::vector<Source> _sources, int _loop_mode, int _ticks_per_frame) {
@@ -110,11 +103,21 @@ void teco::Screen::clear() {
 	} 
 }
 
-void teco::Screen::draw_sprite(int x, int y, teco::Sprite sprite_to_draw) {
+void teco::Screen::draw_sprite(int x, int y, teco::Sprite& sprite_to_draw) {
 	draw_all(x, y, SPRITE_SYMBOLS(sprite_to_draw), SPRITE_COLORS(sprite_to_draw), SPRITE_EFFECTS(sprite_to_draw));
 }
 
-void teco::Screen::draw_all(int x, int y, std::vector<std::vector<char>> symbols_to_draw, std::vector<std::vector<char>> colors_to_draw, std::vector<std::vector<char>> effects_to_draw) {
+void teco::Screen::draw_screen(int x, int y, teco::Screen& screen_to_draw) {
+	draw_all(x, y, screen_to_draw.symbols, screen_to_draw.colors, screen_to_draw.effects);
+}
+
+void teco::Screen::draw_char(int x, int y, char symbol_to_draw, char color_to_draw, char effect_to_draw) {
+	symbols[y][x] = symbol_to_draw;
+	symbols[y][x] = color_to_draw;
+	symbols[y][x] = effect_to_draw;
+}
+
+void teco::Screen::draw_all(int x, int y, std::vector<std::vector<char>>& symbols_to_draw, std::vector<std::vector<char>>& colors_to_draw, std::vector<std::vector<char>>& effects_to_draw) {
 	teco::draw_chars_on_something(x, y, symbols, symbols_to_draw);
 	teco::draw_chars_on_something(x, y, colors, colors_to_draw);
 	teco::draw_chars_on_something(x, y, effects, effects_to_draw);
@@ -161,7 +164,7 @@ bool teco::run = true;
 
 teco::Screen *teco::current_screen;
 
-// functions
+// engine functions
 void teco::init(
 	Screen *_current_screen,
 	int _graphics_type,
@@ -346,20 +349,6 @@ void teco::draw_gui() {
 }
 
 void teco::draw_tui() {
-/*
-	for (int sprite_type_index = 0; sprite_type_index < layer.size(); sprite_type_index++) {
-		for (auto sprite : layer[sprite_type_index]) {
-			auto source = sprite.animations[sprite.current_animation_index].sources[sprite.current_frame];
-			int x = COLS / 2 + sprite.x - (source.symbols[0].size() / 2);
-			int y = LINES / 2 + sprite.y - (source.symbols.size() / 2);
-
-			for (int symbols_line_index = 0; symbols_line_index < source.symbols.size(); symbols_line_index++) {
-				mvprintw(y + symbols_line_index, x, source.symbols[symbols_line_index].c_str());
-			}
-		}
-	}
-*/
-
 	int x;
 	int y;
 
@@ -374,24 +363,11 @@ void teco::draw_tui() {
 	}
 
 	else {
-		mvprintw(y/2-13, x/2-1, "Screen resolution is wrong");
+		mvprintw(y/2-13, x/2-1, "Screen resolution is too small");
 	}
 
 	refresh();
 	clear();
-}
-
-void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw) {
-	for (int line = 0; line < chars_to_draw.size(); line++) {
-		if (y+line <= something_to_draw_on.size()) {
-			for (int column = 0; column < chars_to_draw[line].size(); column++) {
-				if (x+column <= something_to_draw_on[line].size()) {
-					if (chars_to_draw[line][column] != ' ')
-						something_to_draw_on[y+line][x+column] = chars_to_draw[line][column];
-				}
-			}
-		}
-	}
 }
 
 void teco::exit() {
@@ -411,4 +387,51 @@ void teco::exit() {
 	else if (graphics_type == TUI) {
 		endwin();
 	}
+}
+
+// utility functions
+void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw) {
+	for (int line = 0; line < chars_to_draw.size(); line++) {
+		if (y+line <= something_to_draw_on.size()) {
+			for (int column = 0; column < chars_to_draw[line].size(); column++) {
+				if (x+column <= something_to_draw_on[line].size()) {
+					if (chars_to_draw[line][column] != ' ')
+						something_to_draw_on[y+line][x+column] = chars_to_draw[line][column];
+				}
+			}
+		}
+	}
+}
+
+std::vector<std::vector<char>> teco::get_chars_from_file(std::string path) {
+	std::vector<std::vector<char>> result;
+	std::string line;
+	int line_index = 0;
+
+	std::ifstream in = std::ifstream(path);
+
+	if (in.is_open()) {
+		while (std::getline(in, line)) {
+			result.push_back(std::vector<char>());
+
+			for (char symbol : line) {
+				result[line_index].push_back(symbol);
+			}
+
+			line_index++;
+		}
+
+		in.close();
+	}
+
+	return result;
+}
+
+std::vector<std::vector<char>> teco::get_chars_from_strings(std::vector<std::string> strings) {
+	std::vector<std::vector<char>> result = std::vector<std::vector<char>>();
+
+	for (std::string string : strings)
+		result.push_back(std::vector<char>(string.begin(), string.end()));
+
+	return result;
 }
