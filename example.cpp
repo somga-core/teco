@@ -1,4 +1,8 @@
-#include "teco.hpp"
+#include "teco_engine.hpp"
+#include "teco_gui.hpp"
+#include "teco_tui.hpp"
+
+// В этом участке кода по идее не обязательно инклудить teco_engine.hpp, т к его уже инклудят другие, но во всяком случае он не будет инклудится несколько раз т к стоит pragma once
 
 void tick_tock();
 void draw_drew();
@@ -29,7 +33,7 @@ teco::Sprite test_sprite = teco::Sprite(
 
 int main(int argc, char const *argv[])
 {
-    teco::init(&mein_screen, teco::TUI, "z", 60, 20);
+    teco::init_gui(&mein_screen, "z", 60, 20);
 
     teco::effects['#'] = wave_effect;
     teco::effects['&'] = squish_effect;
@@ -40,7 +44,7 @@ int main(int argc, char const *argv[])
 
     animation_switcher = 0;
 
-    teco::mainloop();
+    teco::mainloop_gui();
 
     return 0;
 }
