@@ -1,7 +1,7 @@
- ////// ////// ////// //////
-  //   ////   //     //  //
- //   //     //     //  //
-//   ////// ////// //////
+ ////// ////// ////// //////    ////// //  // //
+  //   ////   //     //  //    //     //  // //
+ //   //     //     //  //    //  // //  // //
+//   ////// ////// //////    ////// ////// //
 
 #include "teco_gui.hpp"
 
@@ -93,28 +93,7 @@ void teco::init_gui(
 }
 
 void teco::mainloop_gui() {
-	while (run) {
-		auto delta_time = unftime() - last_update_time;
-		last_update_time = unftime();
-		time_accumulator += delta_time;
-
-		handle_events_gui();
-			
-		while (time_accumulator > tick_slice) {
-			current_screen->tick();
-			tick_count++;
-	
-			time_accumulator -= tick_slice;
-		}
-
-		current_screen->clear();
-		current_screen->draw();
-
-		draw_gui();
-
-		if (delta_time < draw_slice)
-			unfsleep((draw_slice - delta_time).count());
-	}
+	mainloop(draw_gui, handle_events_gui);
 }
 
 void teco::handle_events_gui() {

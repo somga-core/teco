@@ -1,7 +1,7 @@
- ////// ////// ////// //////
-  //   ////   //     //  //
- //   //     //     //  //
-//   ////// ////// //////
+ ////// ////// ////// //////    ////// //  // //
+  //   ////   //     //  //      //   //  // //
+ //   //     //     //  //      //   //  // //
+//   ////// ////// //////      //   ////// //
 
 #include "teco_tui.hpp"
 
@@ -18,8 +18,6 @@ void teco::init_tui(
 	int background_green,
 	int background_blue
 ) {
-	graphics_type = _graphics_type;
-
 	title = _title;
 
 	fps = _fps;
@@ -39,7 +37,7 @@ void teco::init_tui(
     start_color();
 
 	if (has_colors() == FALSE) {
-		exit();
+		exit_tui();
 	}
         
 	curs_set(0);
@@ -58,28 +56,7 @@ void teco::init_tui(
 }
 
 void teco::mainloop_tui() {
-	while (run) {
-		auto delta_time = unftime() - last_update_time;
-		last_update_time = unftime();
-		time_accumulator += delta_time;
-
-		handle_events_tui();
-			
-		while (time_accumulator > tick_slice) {
-			current_screen->tick();
-			tick_count++;
-	
-			time_accumulator -= tick_slice;
-		}
-
-		current_screen->clear();
-		current_screen->draw();
-
-		draw_tui();
-
-		if (delta_time < draw_slice)
-			unfsleep((draw_slice - delta_time).count());
-	}
+	mainloop(draw_tui, handle_events_tui);
 }
 
 void teco::handle_events_tui() {

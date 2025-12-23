@@ -1,7 +1,7 @@
- ////// ////// ////// //////
-  //   ////   //     //  //
- //   //     //     //  //
-//   ////// ////// //////
+ ////// ////// ////// //////    ////// //  // ////// // //  // //////
+  //   ////   //     //  //    ////   /// // //     // /// // ////
+ //   //     //     //  //    //     // /// //  // // // /// //
+//   ////// ////// //////    ////// //  // ////// // //  // //////
 
 #include "teco_engine.hpp"
 
@@ -124,9 +124,9 @@ void teco::Screen::draw_all(int x, int y, std::vector<std::vector<char>>& symbol
 }
 
 // variables
-int teco::graphics_type;
-
 std::string teco::title;
+
+int tick_count;
 
 int teco::fps;
 int teco::tps;
@@ -149,6 +149,32 @@ unftimepoint teco::last_update_time = unftime();
 bool teco::run = true;
 
 teco::Screen *teco::current_screen;
+
+// engine functions
+void teco::mainloop(void (*draw) (), void (*handle_events) ()) {
+	while (run) {
+		auto delta_time = unftime() - last_update_time;
+		last_update_time = unftime();
+		time_accumulator += delta_time;
+
+		handle_events();
+			
+		while (time_accumulator > tick_slice) {
+			current_screen->tick();
+			tick_count++;
+	
+			time_accumulator -= tick_slice;
+		}
+
+		current_screen->clear();
+		current_screen->draw();
+
+		draw();
+
+		if (delta_time < draw_slice)
+			unfsleep((draw_slice - delta_time).count());
+	}
+}
 
 // utility functions
 void teco::draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw) {

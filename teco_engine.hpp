@@ -1,7 +1,7 @@
- ////// ////// ////// //////
-  //   ////   //     //  //
- //   //     //     //  //
-//   ////// ////// //////
+ ////// ////// ////// //////    ////// //  // ////// // //  // //////
+  //   ////   //     //  //    ////   /// // //     // /// // ////
+ //   //     //     //  //    //     // /// //  // // // /// //
+//   ////// ////// //////    ////// //  // ////// // //  // //////
 
 #pragma once
 
@@ -99,9 +99,9 @@ public:
 };
 
 // variables
-extern int graphics_type;
-
 extern std::string title;
+
+extern int tick_count;
 
 extern int fps;
 extern int tps;
@@ -124,6 +124,9 @@ extern unftimepoint last_update_time;
 extern bool run;
 
 extern Screen *current_screen;
+
+// engine functions
+void mainloop(void (*draw) (), void (*handle_events) ());
 
 // untility functions
 void draw_chars_on_something(int x, int y, std::vector<std::vector<char>> &something_to_draw_on, std::vector<std::vector<char>> chars_to_draw);

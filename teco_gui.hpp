@@ -1,9 +1,7 @@
- ////// ////// ////// //////
-  //   ////   //     //  //
- //   //     //     //  //
-//   ////// ////// //////
-
-#pragma once
+ ////// ////// ////// //////    ////// //  // //
+  //   ////   //     //  //    //     //  // //
+ //   //     //     //  //    //  // //  // //
+//   ////// ////// //////    ////// ////// //
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -17,8 +15,6 @@ namespace teco {
 extern int window_width;
 extern int window_height;
 
-extern int tick_count;
-
 extern SDL_Event event;
 extern SDL_Renderer *renderer;
 extern SDL_Window *window;
@@ -30,7 +26,6 @@ extern std::map<char, std::map<char, SDL_Texture*>> saved_textures;
 extern std::map<char, std::vector<float> (*) (int, int, int)> effects;
 
 // engine functions
-
 void init_gui(
 	Screen *current_screen = NULL,
 	std::string _title = "TeCo",
