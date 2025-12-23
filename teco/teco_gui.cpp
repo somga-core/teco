@@ -23,38 +23,16 @@ std::map<char, std::vector<float> (*) (int, int, int)> teco::effects;
 
 // engine functions
 void teco::init_gui(
-	Screen *_current_screen,
-	std::string _title,
-	int _fps,
-	int _tps,
 	int _window_width,
 	int _window_height,
-	std::map<int, char> _keybinds,
 	std::string font_path,
 	int font_size,
-	std::map<char, std::vector<float> (*) (int, int, int)> _effects,
-	std::map<char, std::vector<unsigned char>> _colors,
-	char _default_color,
-	int background_red, 
-	int background_green,
-	int background_blue
+	std::map<char, std::vector<float> (*) (int, int, int)> _effects
 ) {
-	title = _title;
-
-	fps = _fps;
-	tps = _tps;
-
 	window_width = _window_width;
 	window_height = _window_height;
-
-	current_screen = _current_screen;
-
-	colors = _colors;
-	default_color = _default_color;
 	
 	effects = _effects;
-
-	keybinds = _keybinds;
 	
 	draw_slice = unfduration(second_ratio / fps);
 	tick_slice = unfduration(second_ratio / tps);

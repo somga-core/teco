@@ -6,30 +6,7 @@
 #include "teco_tui.hpp"
 
 // engine functions
-void teco::init_tui(
-	Screen *_current_screen,
-	std::string _title,
-	int _fps,
-	int _tps,
-	std::map<int, char> _keybinds,
-	std::map<char, std::vector<unsigned char>> _colors,
-	char _default_color,
-	int background_red, 
-	int background_green,
-	int background_blue
-) {
-	title = _title;
-
-	fps = _fps;
-	tps = _tps;
-
-	current_screen = _current_screen;
-
-	colors = _colors;
-	default_color = _default_color;
-	
-	keybinds = _keybinds;
-	
+void teco::init_tui() {
 	draw_slice = unfduration(second_ratio / fps);
 	tick_slice = unfduration(second_ratio / tps);
 	
