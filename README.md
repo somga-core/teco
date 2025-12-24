@@ -19,3 +19,6 @@ Detailed instructions on how to use TeCo are in the [`documentation`](https://gi
 - Font in examples: [`JetBrains Mono`](https://www.jetbrains.com/lp/mono/)
 - C++ library for manipulating windows: [`SDL2`](https://www.libsdl.org/)
 - C++ library for manipulating console output: [`Ncurses`](https://invisible-island.net/ncurses/)
+
+## P.S.
+English is not authors native language, so if you find errors or better ways to describe any system, please create an issue
