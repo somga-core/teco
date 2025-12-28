@@ -91,6 +91,7 @@ public:
 
 	Screen(int _width, int _height, void (*_tick) (), void (*_draw) ());
 	void clear();
+	void draw_source(int x, int y, Source& source_to_draw);
 	void draw_sprite(int x, int y, Sprite& sprite_to_draw);
 	void draw_screen(int x, int y, Screen& screen_to_draw);
 	void draw_char(int x, int y, char symbol_to_draw = ' ', char color_to_draw = ' ', char effect_to_draw = ' ');

@@ -103,6 +103,10 @@ void teco::Screen::clear() {
 	} 
 }
 
+void teco::Screen::draw_source(int x, int y, teco::Source& source_to_draw) {
+	draw_all(x, y, source_to_draw.symbols, source_to_draw.colors, source_to_draw.effects);
+}
+
 void teco::Screen::draw_sprite(int x, int y, teco::Sprite& sprite_to_draw) {
 	draw_all(x, y, SPRITE_SYMBOLS(sprite_to_draw), SPRITE_COLORS(sprite_to_draw), SPRITE_EFFECTS(sprite_to_draw));
 }
