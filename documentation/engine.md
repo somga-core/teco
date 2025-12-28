@@ -46,17 +46,15 @@ Loop mode is defined using variables from enum:
 - `STOP_ON_LAST_FRAME` - after animation is completed, it will stop on last frame of this animations
 
 ### Variables
-`std::vector<Source> sources` - sequence of `Sources`
-
-`int loop_mode` - loop mode from enum that is described earlier
-
-`int ticks_per_frame` - number of ticks that frame will wait before changing
+- `std::vector<Source> sources` - sequence of `Sources`
+- `int loop_mode` - loop mode from enum that is described earlier
+- `int ticks_per_frame` - number of ticks that frame will wait before changing
 
 ### Functions
-`Animation` - define `Animation`:
-- `std::vector<Source> _sources` - will be directlry assigned to `sources`
-- `int _loop_mode` - will be directlry assigned to `loop_mode`. Default - `STOP_ON_FIRST_FRAME`
-- `int _ticks_per_frame` - will be directlry assigned to `ticks_per_frame`. Default - `2`
+- `Animation` - define `Animation`:
+  - `std::vector<Source> _sources` - will be directlry assigned to `sources`
+  - `int _loop_mode` - will be directlry assigned to `loop_mode`. Default - `STOP_ON_FIRST_FRAME`
+  - `int _ticks_per_frame` - will be directlry assigned to `ticks_per_frame`. Default - `2`
 
 ## Sprite
 `Sprite` is a class for storing and manipulating `Animations`
