@@ -35,7 +35,6 @@
 namespace teco {
 
 // enums
-enum {TUI, GUI};
 enum {LOOPING, STOP_ON_FIRST_FRAME, STOP_ON_LAST_FRAME};
 
 // classes
