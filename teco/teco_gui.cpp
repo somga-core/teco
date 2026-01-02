@@ -9,8 +9,6 @@
 int teco::window_width;
 int teco::window_height;
 
-int teco::tick_count;
-
 SDL_Event teco::event;
 SDL_Renderer *teco::renderer = NULL;
 SDL_Window *teco::window = NULL;

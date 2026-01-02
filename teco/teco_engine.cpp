@@ -130,7 +130,7 @@ void teco::Screen::draw_all(int x, int y, std::vector<std::vector<char>>& symbol
 // variables
 std::string teco::title;
 
-int tick_count;
+unsigned long long teco::tick_count;
 
 int teco::fps;
 int teco::tps;

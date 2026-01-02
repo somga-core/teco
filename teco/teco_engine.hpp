@@ -101,7 +101,7 @@ public:
 // variables
 extern std::string title;
 
-extern int tick_count;
+extern unsigned long long tick_count;
 
 extern int fps;
 extern int tps;
