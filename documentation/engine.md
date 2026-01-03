@@ -1,3 +1,20 @@
+# Navigation
+- [Engine](#engine)
+  - [Source](#source)
+    - [Variables](#variables)
+    - [Functions](#functions)
+  - [Animation](#animation)
+    - [Variables](#variables-1)
+    - [Functions](#functions-1)
+  - [Sprite](#sprite)
+    - [Variables](#variables-2)
+    - [Functions](#functions-2)
+  - [Screen](#screen)
+    - [Variables](#variables-3)
+    - [Functions](#functions-3)
+  - [Variables](#variables-4)
+  - [Functions](#functions-4)
+
 # Engine
 The engine part of TeCo (`teco_engine.cpp` and `teco_engine.hpp`) is needed basically for placing ASCII image information on a 2D plane, as well as handling mainloop logic and storing global varibles for GUI and TUI parts
 
@@ -130,8 +147,49 @@ Loop mode is defined using variables from enum:
   - `std::vector<std::vector<char>>& colors_to_draw` - `colors` that will be placed on the image
   - `std::vector<std::vector<char>>& effects_to_draw` - `effects` that will be placed on the image
 
-## Init
+## Variables
+- `Screen *current_screen` - pointer to screen that would be processed
+- `int fps` - number of times that `draw` function of `current_screen` and window updating (Or terminal printing) function would be called per second
+- `int tps` - number of times that `tick` function of `current_screen` would be called per second
+- `std::map<char, std::vector<unsigned char>> colors` - lookup table of colors, where key is `char` and value is `vector` of 3 color channels (RGB)
+- `char default_color` - key for `colors` lookup table, that defines color, which would be aplied to `symbol` of there are no `color` `chars` in same position
+- `int background_red` - red channel of background color
+- `int background_green` - green channel of background color
+- `int background_blue` - blue channel of background color
+- `std::vector<char> pressed_keys` - array that stores `chars` of pressed keys
+- `std::map<int, char> keybinds` - lookup table for keybinds, where key is graphycs-type-depended constant (For example, `SDLK_ESCAPE` from `SDL`, or `KEY_UP` from `Ncurses`) and value is `char` that would be added to `pressed_keys` after that key detection
+- `std::string title` - title of window
+- `unsigned long long tick_count` - variable that increases by 1 every tick
 
-## Mainloop
+## Functions
+- `init` - initializes all not-graphics-type-dependend systems (You can also change mentioned here variables manualy later):
+	- `Screen *_current_screen` - will be directlry assigned to `width`. 
+	- `std::string _title` - will be directlry assigned to `title`. Default - `"TeCo"`
+	- `int _fps` - will be directlry assigned to `fps`. Default - `60`
+	- `int _tps` - will be directlry assigned to `tps`. Default - `20`
+	- `std::map<int, char> _keybinds` - will be directlry assigned to `keybinds`. Default - empty vector
+	- `std::map<char, std::vector<unsigned char>> _colors` - will be directlry assigned to `colors`. Default `char`-`vector` pairs:
+	  - `'0'` - `{229, 229, 229}`
+	  - `'1'` - `{160, 160, 160}`
+	  - `'2'` - `{10, 162, 146}`
+	  - `'3'` - `{0, 133, 102}`
+	  - `'4'` - `{165, 89, 177}`
+	  - `'5'` - `{102, 0, 153}`
+	  - `'6'` - `{42, 111, 189}`
+	  - `'7'` - `{19, 68, 125}`
+	  - `'8'` - `{209, 148, 23}`
+	  - `'9'` - `{178, 94, 13}`
+	  - `'A'` - `{135, 173, 0}`
+	  - `'B'` - `{94, 117, 0}`
+	  - `'C'` - `{171, 0, 0}`
+	  - `'D'` - `{127, 0, 31}`
+	  - `'E'` - `{103, 103, 103}`
+	  - `'F'` - `{0, 0, 0}`
+	- `char _default_color` - will be directlry assigned to `default_color`. Default - `0`
+	- `int _background_red` - will be directlry assigned to `background_red`. Default - `0x12`
+	- `int _background_green` - will be directlry assigned to `background_green`. Default - `0x12`
+	- `int _background_blue` - will be directlry assigned to `background_blue`. Default - `0x12`
 
-## Current screen
+- `mainloop` - starts loop with ticking and drawing (Usually it's better to use `mainloop_gui` and `mainloop_tui`. More on that in [`gui.md`](gui.md) and [`tui.md`](tui.md)):
+  - `void (*draw) ()` - function for drawing `current_screen` data in window or print it in terminal
+  - `void (*handle_events) ()` - function that handles key presses and other graphics-type-dependend events
