@@ -135,9 +135,6 @@ unsigned long long teco::tick_count;
 int teco::fps;
 int teco::tps;
 
-int teco::window_width_in_symbols;
-int teco::window_height_in_symbols;
-
 std::vector<char> teco::pressed_keys;
 
 std::map<char, std::vector<unsigned char>> teco::colors;

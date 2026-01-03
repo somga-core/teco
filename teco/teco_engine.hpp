@@ -106,9 +106,6 @@ extern unsigned long long tick_count;
 extern int fps;
 extern int tps;
 
-extern int window_width_in_symbols;
-extern int window_height_in_symbols;
-
 extern std::vector<char> pressed_keys;
 
 extern std::map<char, std::vector<unsigned char>> colors;
