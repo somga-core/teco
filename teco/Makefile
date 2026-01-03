@@ -11,7 +11,7 @@ TECO_TUI=./teco_tui.hpp
 
 RMCOMMAND=rm -f
 
-.PHONY: clean build
+.PHONY: all gui tui run clean
 
 all: clean 
 	$(CC) -o $(OUTPUT) $(INPUT) $(TECO_ENGINE) $(TECO_GUI) $(TECO_TUI) $(GUI_FLAGS) $(TUI_FLAGS)
