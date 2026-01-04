@@ -26,7 +26,7 @@ extern std::map<char, std::vector<float> (*) (int, int, int)> effects;
 
 // engine functions
 void init_gui(
-	int _window_wifth = 640,
+	int _window_width = 640,
 	int _window_height = 480,
 	std::string font_path = "assets/font.ttf",
 	int font_size = 20,
