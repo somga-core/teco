@@ -190,6 +190,6 @@ Loop mode is defined using variables from enum:
 	- `int _background_green` - will be directlry assigned to `background_green`. Default - `0x12`
 	- `int _background_blue` - will be directlry assigned to `background_blue`. Default - `0x12`
 
-- `mainloop` - starts loop with ticking and drawing (Usually it's better to use `mainloop_gui` and `mainloop_tui`. More on that in [`gui.md`](gui.md) and [`tui.md`](tui.md)):
+- `mainloop` - starts loop with ticking and drawing `current_screen` (Usually it's better to use `mainloop_gui` and `mainloop_tui`. More on that in [`gui.md`](gui.md) and [`tui.md`](tui.md)):
   - `void (*draw) ()` - function for drawing `current_screen` data in window or print it in terminal
   - `void (*handle_events) ()` - function that handles key presses and other graphics-type-dependend events
