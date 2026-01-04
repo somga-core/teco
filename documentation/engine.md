@@ -151,7 +151,7 @@ Loop mode is defined using variables from enum:
 - `Screen *current_screen` - pointer to screen that would be processed
 - `int fps` - number of times that `draw` function of `current_screen` and window updating (Or terminal printing) function would be called per second
 - `int tps` - number of times that `tick` function of `current_screen` would be called per second
-- `std::map<char, std::vector<unsigned char>> colors` - lookup table of colors, where key is `char` and value is `vector` of 3 color channels (RGB)
+- `std::map<char, std::vector<unsigned char>> colors` - lookup table of `colors`, where key is `char` and value is `vector` of 3 color channels (RGB)
 - `char default_color` - key for `colors` lookup table, that defines color, which would be aplied to `symbol` of there are no `color` `chars` in same position
 - `int background_red` - red channel of background color
 - `int background_green` - green channel of background color

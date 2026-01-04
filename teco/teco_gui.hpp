@@ -30,7 +30,7 @@ void init_gui(
 	int _window_height = 480,
 	std::string font_path = "assets/font.ttf",
 	int font_size = 20,
-	std::map<char, std::vector<float> (*) (int, int, int)> effects = std::map<char, std::vector<float> (*) (int, int, int)>()
+	std::map<char, std::vector<float> (*) (int, int, int)> _effects = std::map<char, std::vector<float> (*) (int, int, int)>()
 );
 void mainloop_gui();
 void handle_events_gui();
