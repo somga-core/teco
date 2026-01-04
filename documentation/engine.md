@@ -157,7 +157,7 @@ Loop mode is defined using variables from enum:
 - `int background_green` - green channel of background color
 - `int background_blue` - blue channel of background color
 - `std::vector<char> pressed_keys` - array that stores `chars` of pressed keys
-- `std::map<int, char> keybinds` - lookup table for keybinds, where key is graphycs-type-depended constant (For example, `SDLK_ESCAPE` from `SDL`, or `KEY_UP` from `Ncurses`) and value is `char` that would be added to `pressed_keys` after that key detection
+- `std::map<int, char> keybinds` - lookup table for keybinds, where key is graphycs-type-depended constant (For example, `SDLK_ESCAPE` from `SDL2`, or `KEY_UP` from `NCurses`) and value is `char` that would be added to `pressed_keys` after that key detection
 - `std::string title` - title of window
 - `unsigned long long tick_count` - variable that increases by 1 every tick
 
@@ -167,7 +167,7 @@ Loop mode is defined using variables from enum:
 	- `std::string _title` - will be directlry assigned to `title`. Default - `"TeCo"`
 	- `int _fps` - will be directlry assigned to `fps`. Default - `60`
 	- `int _tps` - will be directlry assigned to `tps`. Default - `20`
-	- `std::map<int, char> _keybinds` - will be directlry assigned to `keybinds`. Default - empty vector
+	- `std::map<int, char> _keybinds` - will be directlry assigned to `keybinds`. Default - empty `vector`
 	- `std::map<char, std::vector<unsigned char>> _colors` - will be directlry assigned to `colors`. Default `char`-`vector` pairs:
 	  - `'0'` - `{229, 229, 229}`
 	  - `'1'` - `{160, 160, 160}`
