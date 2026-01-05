@@ -31,7 +31,7 @@ So your includes must look something like that:
 ```
 
 ## Initialization
-Then you need to run init functions. Always run `teco::init()`. Use `teco::init_gui()` for GUI and `teco::init_tui()` for TUI:
+Then you need to run init functions. Always run `init()`. Use `init_gui()` for GUI and `init_tui()` for TUI:
 
 ```c++
 #include "teco_engine.hpp"
@@ -43,6 +43,26 @@ int main() {
 
     return 0;
 }
+```
+
+In `init()` you must specify starting screen (More on that later) and also can specify, FPS and TPS (More on that later), keybinds (More on that later) and a few color options (More on that later):
+
+```c++
+// ∅
+
+teco::init(screen, 60, 20, keybinds, colors, default_color, background_red, background_green, background_blue);
+
+// ∅
+```
+
+In `init_gui()` you can specify default window width and height, path to font and it's size, as well as effects lookup table (More on that later):
+
+```c++
+// ∅
+
+teco::init_gui(600, 400, "path/to/font.ttf", 20, effects);
+
+// ∅
 ```
 
 ## Screens
@@ -93,7 +113,7 @@ int main() {
 
     // ∅
 
-    current_screen = sec_screen; // Switching to different screen
+    teco::current_screen = sec_screen; // Switching to different screen
 
     return 0;
 }
@@ -103,7 +123,30 @@ int main() {
 `Source` is a class that stores ASCII-image. ASCII-image is composed of `symbols`, `colors` and `effects`:
 - `symbols` represent which symbol would be displayed
 - `colors` specify in which color from lookup table symbol would be painted
-- `effects` specify which effect would be applied on symbol (More on that system later)
+- `effects` specify which effect would be applied on symbol. They work only in GUI (More on that system later)
+
+`colors` lookup table can be specified in `init()` or by setting `colors` variable, `effects` lookup table can be specified in `init_gui()` or by setting `effects` variable:
+
+```c++
+// ∅
+
+teco::init(..., ..., ..., ..., colors);
+teco::init_gui(..., ..., ..., ..., effects);
+
+// ∅
+```
+
+```c++
+// ∅
+
+teco::init(...);
+teco::init_gui(..);
+
+teco::colors = ...;
+teco::effects = ...;
+
+// ∅
+```
 
 ## Sprites
 `Sprites` is a class for storing and processing `Animations` (More on them later). You can draw it on `Screen`. To init sprite you need to specify `vector` of `Animations`. 
