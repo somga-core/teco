@@ -9,7 +9,6 @@
   - [Tick and draw in mainloop](#tick-and-draw-in-mainloop)
   - [Keybinds](#keybinds)
   - [Compilation](#compilation)
-  - [Result](#result)
 
 # Quick start
 To start using `TeCo` you need to copy it's engine files into your project. They are located in [`teco`](/teco/) folder. You always want to copy [`teco_engine.cpp`](/teco/teco_engine.cpp) and [`teco_engine.hpp`](/teco/teco_engine.hpp)
@@ -122,8 +121,8 @@ int main() {
 ## Sources
 `Source` is a class that stores ASCII-image. ASCII-image is composed of `symbols`, `colors` and `effects`:
 - `symbols` represent which symbol would be displayed
-- `colors` specify in which color from lookup table symbol would be painted
-- `effects` specify which effect would be applied on symbol. They work only in GUI (More on that system later)
+- `colors` specify in which color from lookup table symbol would be painted. Colors are vectors with 3 elements: red, green and blue channels
+- `effects` specify which effect would be applied on symbol. They work only in GUI. Effects are functions with arguments: x position of symbol, y position of symbol and tick count, that must return `vector` with 4 elements: relative x position in symbols, relative y position in symbols (0 for no symbol offset), width of symbol, height of symbol (1 for default symbol scale)
 
 `colors` lookup table can be specified in `init()` or by setting `colors` variable, `effects` lookup table can be specified in `init_gui()` or by setting `effects` variable:
 
@@ -148,8 +147,49 @@ teco::effects = ...;
 // ∅
 ```
 
+Here is default `colors` lookup table:
+
+```c++
+teco::colors = std::map<char, std::vector<unsigned char>> {
+		{'0', std::vector<unsigned char> {229, 229, 229}},
+		{'1', std::vector<unsigned char> {160, 160, 160}},
+		{'2', std::vector<unsigned char> {10, 162, 146}},
+		{'3', std::vector<unsigned char> {0, 133, 102}},
+		{'4', std::vector<unsigned char> {165, 89, 177}},
+		{'5', std::vector<unsigned char> {102, 0, 153}},
+		{'6', std::vector<unsigned char> {42, 111, 189}},
+		{'7', std::vector<unsigned char> {19, 68, 125}},
+		{'8', std::vector<unsigned char> {209, 148, 23}},
+		{'9', std::vector<unsigned char> {178, 94, 13}},
+		{'A', std::vector<unsigned char> {135, 173, 0}},
+		{'B', std::vector<unsigned char> {94, 117, 0}},
+		{'C', std::vector<unsigned char> {171, 0, 0}},
+		{'D', std::vector<unsigned char> {127, 0, 31}},
+		{'E', std::vector<unsigned char> {103, 103, 103}},
+		{'F', std::vector<unsigned char> {0, 0, 0}}
+}
+```
+
+And here is example `effects`:
+
+```c++
+std::vector<float> some_effect(int x, int y, int tick_count);
+std::vector<float> other_effect(int x, int y, int tick_count);
+
+// ∅
+
+teco::effects = std::map<char, std::vector<float> (*) (int, int, int)> {
+  {'#', some_effect},
+  {'&', other_effect}
+}
+```
+
+You can find effect examples in [effect_switcher](/examples/effect_switcher/example.cpp) example
+
+In addition to `colors` lookup table in `init()` you need to pass `default_color`, which is key in `colors` lookup table of color, that will be applied to symbol wihout specified color and `background_red`, `background_green`, `background_blue` which are channels of background color
+
 ## Sprites
-`Sprites` is a class for storing and processing `Animations` (More on them later). You can draw it on `Screen`. To init sprite you need to specify `vector` of `Animations`. 
+`Sprites` is a class for storing and processing `Animations` (More on them later). You can draw it on `Screen`. To init sprite you need to specify `vector` of `Animations`
 
 ### Animations
 
@@ -161,6 +201,3 @@ teco::effects = ...;
 
 
 ## Compilation
-
-
-## Result
