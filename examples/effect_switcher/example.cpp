@@ -6,23 +6,8 @@ std::vector<float> wave_effect(int x, int y, int tick_count);
 std::vector<float> squish_effect(int x, int y, int tick_count);
 int animation_switcher;
 
-teco::Screen main_screen = teco::Screen(48, 14, &tick, &draw);;
-
-// setting up sprite with 2 animations
-teco::Sprite test_sprite = teco::Sprite(
-    std::vector<teco::Animation> {
-        teco::Animation(
-            std::vector<teco::Source> {
-                teco::Source("assets/squish/def.tcsb", "assets/squish/def.tccl", "assets/squish/def.tcef"),
-            }
-        ),
-        teco::Animation(
-            std::vector<teco::Source> {
-                teco::Source("assets/wave/def.tcsb", "assets/wave/def.tccl", "assets/wave/def.tcef")
-            }
-        )
-    }
-);;
+teco::Screen main_screen;
+teco::Sprite test_sprite;
 
 int main() {
     // initializing teco
@@ -38,6 +23,24 @@ int main() {
 
     // setting variables
     animation_switcher = 0;
+
+    main_screen = teco::Screen(48, 14, &tick, &draw);
+
+    // setting up sprite with 2 animations
+    test_sprite = teco::Sprite(
+        std::vector<teco::Animation> {
+            teco::Animation(
+                std::vector<teco::Source> {
+                    teco::Source("assets/squish/def.tcsb", "assets/squish/def.tccl", "assets/squish/def.tcef"),
+                }
+            ),
+            teco::Animation(
+                std::vector<teco::Source> {
+                    teco::Source("assets/wave/def.tcsb", "assets/wave/def.tccl", "assets/wave/def.tcef")
+                }
+            )
+        }
+    );
 
     // starting main loop (obviously)
     teco::mainloop_gui();

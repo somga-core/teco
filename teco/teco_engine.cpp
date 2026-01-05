@@ -30,6 +30,8 @@ teco::Animation::Animation(std::vector<Source> _sources, int _loop_mode, int _ti
 	ticks_per_frame = _ticks_per_frame;
 }
 
+teco::Sprite::Sprite() {};
+
 teco::Sprite::Sprite(std::vector<Animation> _animations, int _current_animation_index, int _current_animation_frame_index) {
 	animations = _animations;
 
@@ -76,6 +78,8 @@ void teco::Sprite::update_animations() {
 		current_animation_tick = 0;
 	}
 }
+
+teco::Screen::Screen() {};
 
 teco::Screen::Screen(int _width, int _height, void (*_tick) (), void (*_draw) ()) {
 	width = _width;
