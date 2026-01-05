@@ -223,6 +223,7 @@ Wully painted blue (Using default lookup table) and with `some_effect` from exam
 # #
 ```
 
+`some_cpp_file.cpp`:
 ```c++
 // ∅
 
