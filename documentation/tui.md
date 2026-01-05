@@ -3,7 +3,7 @@
   - [Functions](#functions)
 
 # TUI
-TUI part (`teco_tui.cpp` and `teco_tui.hpp`) is needed for terminal input and output. It's handled mainly by `NCurses` lib. `effects` don't affect this graphics type
+TUI part ([`teco_tui.cpp`](/teco/teco_tui.cpp) and [`teco_tui.hpp`](/teco/teco_tui.hpp)) is needed for terminal input and output. It's handled mainly by `NCurses` lib. `effects` don't affect this graphics type
 
 ## Functions
 - `init_tui` - initialize all systems needed for TUI input and output

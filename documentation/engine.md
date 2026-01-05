@@ -16,7 +16,7 @@
   - [Functions](#functions-4)
 
 # Engine
-The engine part of TeCo (`teco_engine.cpp` and `teco_engine.hpp`) is needed basically for placing ASCII image information on a 2D plane, as well as handling mainloop logic and storing global varibles for GUI and TUI parts
+The engine part of TeCo ([`teco_engine.cpp`](/teco/teco_engine.cpp) and [`teco_engine.hpp`](/teco/teco_engine.hpp)) is needed basically for placing ASCII image information on a 2D plane, as well as handling mainloop logic and storing global varibles for GUI and TUI parts
 
 ## Source
 `Source` is a class that stores ASCII images

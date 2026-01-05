@@ -4,7 +4,7 @@
   - [Functions](#functions)
 
 # GUI
-GUI part (`teco_gui.cpp` and `teco_gui.hpp`) is needed for window input and output. It's handled mainly by `SDL2` lib. Using this graphics type allows you to use `effects` system
+GUI part ([`teco_gui.cpp`](/teco/teco_gui.cpp) and [`teco_gui.hpp`](/teco/teco_gui.hpp)) is needed for window input and output. It's handled mainly by `SDL2` lib. Using this graphics type allows you to use `effects` system
 
 ## Variables
 - `std::map<char, std::vector<float> (*) (int, int, int)> effects` - lookup table of `effects`, where key is `char` and value is function with arguments: x position of symbol, y position of symbol and tick count, that must return `vector` with 4 elements: relative x position in symbols, relative y position in symbols (0 for no symbol offset), width of symbol, height of symbol (1 for default symbol scale)
