@@ -3,9 +3,9 @@
   - [Includes](#includes)
   - [Initialization](#initialization)
   - [Screens](#screens)
+  - [Sources](#sources)
   - [Sprites](#sprites)
     - [Animations](#animations)
-    - [Sources](#sources)
   - [Tick and draw in mainloop](#tick-and-draw-in-mainloop)
   - [Keybinds](#keybinds)
   - [Compilation](#compilation)
@@ -69,7 +69,7 @@ int main() {
 }
 ```
 
-You can also init several `Screens` and switch to them later:
+You can also init several `Screens` and switch between them later:
 
 ```c++
 #include "teco_engine.hpp"
@@ -99,13 +99,16 @@ int main() {
 }
 ```
 
-## Sprites
+## Sources
+`Source` is a class that stores ASCII-image. ASCII-image is composed of `symbols`, `colors` and `effects`:
+- `symbols` represent which symbol would be displayed
+- `colors` specify in which color from lookup table symbol would be painted
+- `effects` specify which effect would be applied on symbol (More on that system later)
 
+## Sprites
+`Sprites` is a class for storing and processing `Animations` (More on them later). You can draw it on `Screen`. To init sprite you need to specify `vector` of `Animations`. 
 
 ### Animations
-
-
-### Sources
 
 
 ## Tick and draw in mainloop
