@@ -25,7 +25,7 @@ So your includes must look something like that:
 
 ```c++
 #include "teco_engine.hpp"
-#include "teco_gui.hpp" // or "teco_tui.hpp"
+#include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 // ∅
 ```
@@ -35,11 +35,11 @@ Then you need to run init functions. Always run `teco::init()`. Use `teco::init_
 
 ```c++
 #include "teco_engine.hpp"
-#include "teco_gui.hpp" // or "teco_tui.hpp"
+#include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 int main() {
     teco::init();
-    teco::init_gui(); // or teco::init_tui();
+    teco::init_gui(); // Or teco::init_tui();
 
     return 0;
 }
@@ -52,7 +52,7 @@ To init `Screen` you need to specify width and height as well as tick and draw f
 
 ```c++
 #include "teco_engine.hpp"
-#include "teco_gui.hpp" // or "teco_tui.hpp"
+#include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 void tick() {};
 void draw() {};
@@ -61,7 +61,7 @@ teco::Screen screen;
 
 int main() {
     teco::init(screen);
-    teco::init_gui(); // or teco::init_tui();
+    teco::init_gui(); // Or teco::init_tui();
 
     screen = teco::Screen(48, 14, &tick, &draw);
 
@@ -73,7 +73,7 @@ You can also init several `Screens` and switch to them later:
 
 ```c++
 #include "teco_engine.hpp"
-#include "teco_gui.hpp" // or "teco_tui.hpp"
+#include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 void main_tick() {};
 void main_draw() {};
@@ -85,12 +85,15 @@ teco::Screen main_screen;
 teco::Screen sec_screen;
 
 int main() {
-    teco::init(screen);
-    teco::init_gui(); // or teco::init_tui();
+    teco::init(main_screen);
+    teco::init_gui(); // Or teco::init_tui();
     
+    main_screen = teco::Screen(48, 14, &tick, &draw);
+    sec_screen = teco::Screen(48, 14, &tick, &draw);
+
     // ∅
 
-    screen = teco::Screen(48, 14, &tick, &draw);
+    current_screen = sec_screen; // Switching to different screen
 
     return 0;
 }
