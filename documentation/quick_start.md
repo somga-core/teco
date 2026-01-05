@@ -82,6 +82,8 @@ teco::init_gui(..., ..., ..., ..., effects);
 // ∅
 ```
 
+Or:
+
 ```c++
 // ∅
 
@@ -131,7 +133,7 @@ teco::effects = std::map<char, std::vector<float> (*) (int, int, int)> {
 }
 ```
 
-You can find effect examples in [effect_switcher](/examples/effect_switcher/example.cpp) example
+You can find effect examples in [`examples/effect_switcher`](/examples/effect_switcher)
 
 In addition to `colors` lookup table in `init()` you need to pass `default_color`, which is key in `colors` lookup table of color, that will be applied to symbol wihout specified color and `background_red`, `background_green`, `background_blue` which are channels of background color
 
