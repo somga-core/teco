@@ -5,8 +5,8 @@
   - [ASCII images](#ascii-images)
   - [Screens](#screens)
   - [Sources](#sources)
+  - [Animations](#animations)
   - [Sprites](#sprites)
-    - [Animations](#animations)
   - [Tick and draw in mainloop](#tick-and-draw-in-mainloop)
   - [Keybinds](#keybinds)
   - [Compilation](#compilation)
@@ -290,11 +290,8 @@ teco::Source source = teco::Source(
 // ∅
 ```
 
-## Sprites
-`Sprite` is a class for storing and processing `Animations` (More on them later). To init sprite you need to specify `vector` of `Animations` and can specify index of `Animation` in that `vector` that will be played first and it's starting frame
-
-### Animations
-`Animation` is a class for storing sequence of `Sources`. To initialize it you need to specify `vector` of `Sources`, loop mode and number of ticks for frame (More on that later)
+## Animations
+`Animation` is a class for storing sequence of `Sources`. It's needed mainly to pass as argument in `Sprites`. To initialize it you need to specify `vector` of `Sources`, and can specify loop mode and number of ticks for frame (More on that later)
 
 Loop mode is defined using enum:
 - `LOOPING` - after animation is completed, it will be repeated
@@ -304,7 +301,9 @@ Loop mode is defined using enum:
 So, here is example `Animation`:
 
 ```c++
-teco::Animation(
+// ∅
+
+teco::Animation animation = teco::Animation(
     std::vector<teco::Source> {
         teco::Source("source1.tcsb", "source1.tccl", "source1.tcef"),
         teco::Source("source2.tcsb", "source2.tccl", "source2.tcef"),
@@ -314,12 +313,59 @@ teco::Animation(
     teco::LOOPING, // Or teco::STOP_ON_FIRST_FRAME or teco::STOP_ON_LAST_FRAME
     2
 )
+
+// ∅
+```
+
+## Sprites
+`Sprite` is a class for storing and processing `Animations`. To init sprite you need to specify `vector` of `Animations` and can specify index of `Animation` in that `vector` that will be played first and it's starting frame
+
+Here is example `Sprite` initialization:
+
+```c++
+// ∅
+
+teco::Sprite sprite = teco::Sprite(
+    std::vector<teco::Animation> {
+        teco::Animation(
+            std::vector<teco::Source> {
+                teco::Source("source1.tcsb", "source1.tccl", "source1.tcef"),
+                teco::Source("source2.tcsb", "source2.tccl", "source2.tcef")
+            },
+            teco::LOOPING,
+            4
+        ),
+        teco::Animation(
+            std::vector<teco::Source> {
+                teco::Source("source3.tcsb", "source3.tccl", "source3.tcef"),
+                teco::Source("source4.tcsb", "source4.tccl", "source4.tcef")
+            },
+            teco::STOP_ON_LAST_FRAME,
+            4
+        )
+    }
+);
+
+// ∅
 ```
 
 ## Tick and draw in mainloop
+Next you want to start mainloop. Run `mainloop_tui()` if you are using TUI, and `mainloop_gui()` if you are using GUI
 
+This mainloop is needed for updating window or terminal printing with frequency of `fps`. It's also will run `tick` and `draw` function of `current_screen`. `tick` would be executed with frequency of `tps` and `draw` with frequency of `fps`
+
+In your `draw` function you want to draw all `Sprites` and `Sources` (Or even other `Screens`) on `Screen`
+
+In your `tick` function you want to update `Sprites` animations, detect keybinds (More on them later) and run your game logic
+
+Here is an example:
+
+```c++
+
+```
 
 ## Keybinds
-
+To check for pressed keys you need to check variable `pressed_keys`, which is `vector` with keys of `keybinds` lookup table
 
 ## Compilation
+For compilation see [`compilation.md`](compilation.md)
