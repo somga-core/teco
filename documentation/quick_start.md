@@ -99,6 +99,8 @@ teco::effects = ...;
 Here is default `colors` lookup table:
 
 ```c++
+// ∅
+
 teco::colors = std::map<char, std::vector<unsigned char>> {
 		{'0', std::vector<unsigned char> {229, 229, 229}},
 		{'1', std::vector<unsigned char> {160, 160, 160}},
@@ -117,6 +119,8 @@ teco::colors = std::map<char, std::vector<unsigned char>> {
 		{'E', std::vector<unsigned char> {103, 103, 103}},
 		{'F', std::vector<unsigned char> {0, 0, 0}}
 }
+
+// ∅
 ```
 
 And here is example `effects`:
@@ -192,7 +196,7 @@ int main() {
 ```
 
 ## Sources
-To init `Source` you need to specify path to files with `symbols`, `colors` and `effects`. Extentions for them are: `.tcsb`, `.tccl`, `tcef` respectively
+Source is a class that stores ASCII images. To init `Source` you need to specify path to files with `symbols`, `colors` and `effects`. Extentions for them are: `.tcsb`, `.tccl`, `tcef` respectively
 
 For example, to display this image:
 
@@ -290,7 +294,27 @@ teco::Source source = teco::Source(
 `Sprite` is a class for storing and processing `Animations` (More on them later). To init sprite you need to specify `vector` of `Animations` and can specify index of `Animation` in that `vector` that will be played first and it's starting frame
 
 ### Animations
-`Animation` is a class for storing sequence of `Sources`
+`Animation` is a class for storing sequence of `Sources`. To initialize it you need to specify `vector` of `Sources`, loop mode and number of ticks for frame (More on that later)
+
+Loop mode is defined using enum:
+- `LOOPING` - after animation is completed, it will be repeated
+- `STOP_ON_FIRST_FRAME` - after animation is completed, it will stop on first frame of this animations
+- `STOP_ON_LAST_FRAME` - after animation is completed, it will stop on last frame of this animations
+
+So, here is example `Animation`:
+
+```c++
+teco::Animation(
+    std::vector<teco::Source> {
+        teco::Source("source1.tcsb", "source1.tccl", "source1.tcef"),
+        teco::Source("source2.tcsb", "source2.tccl", "source2.tcef"),
+        teco::Source("source3.tcsb", "source3.tccl", "source3.tcef"),
+        teco::Source("source4.tcsb", "source4.tccl", "source4.tcef")
+    },
+    teco::LOOPING, // Or teco::STOP_ON_FIRST_FRAME or teco::STOP_ON_LAST_FRAME
+    2
+)
+```
 
 ## Tick and draw in mainloop
 
