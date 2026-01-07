@@ -86,8 +86,16 @@ void teco::handle_events_gui() {
 		}
 
 		else if (event.type == SDL_KEYDOWN) {
-			if (keybinds.count(event.key.keysym.sym) != 0)
+			if (keybinds.count(event.key.keysym.sym) != 0 && std::count(pressed_keys.begin(), pressed_keys.end(), keybinds[event.key.keysym.sym]) < 1)
 				pressed_keys.push_back(keybinds[event.key.keysym.sym]);
+		}
+
+		else if (event.type == SDL_KEYUP) {
+			if (keybinds.count(event.key.keysym.sym) != 0) {
+				auto key_in_pressed_keys = std::find(pressed_keys.begin(), pressed_keys.end(), keybinds[event.key.keysym.sym]);
+				if (key_in_pressed_keys != pressed_keys.end())
+					pressed_keys.erase(key_in_pressed_keys);
+			}
 		}
 	}
 }
