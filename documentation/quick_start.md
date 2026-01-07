@@ -142,7 +142,7 @@ You can find effect examples in [`examples/effect_switcher`](/examples/effect_sw
 In addition to `colors` lookup table in `init()` you need to pass `default_color`, which is key in `colors` lookup table of color, that will be applied to symbol wihout specified color and `background_red`, `background_green`, `background_blue` which are channels of background color
 
 ## Screens
-In `init` function you must pass `current_screen` argument. It has `Screen` type. It's a 2D plane that will be displayed on window or in terminal and on which you will be drawing symbols
+In `init` function you must pass `current_screen` argument. It has `Screen` type. It's a 2D plane (ACSII image) that will be displayed on window or in terminal and on which you will be drawing symbols, `Sources` or `Sprites` (More on them later)
 
 To init `Screen` you need to specify width and height as well as tick and draw functions (More on that later):
 
@@ -343,7 +343,9 @@ teco::Sprite sprite = teco::Sprite(
             teco::STOP_ON_LAST_FRAME,
             4
         )
-    }
+    },
+    1,
+    0
 );
 
 // ∅
@@ -361,11 +363,154 @@ In your `tick` function you want to update `Sprites` animations, detect keybinds
 Here is an example:
 
 ```c++
+#include "teco_engine.hpp"
+#include "teco_gui.hpp" // Or "teco_tui.hpp"
 
+void tick();
+void draw();
+
+teco::Screen screen;
+teco::Sprite sprite;
+
+int sprite_x;
+
+int main() {
+    teco::init(screen);
+    teco::init_gui(); // Or teco::init_tui();
+
+    screen = teco::Screen(48, 14, &tick, &draw);
+    sprite = teco::Sprite(
+        std::vector<teco::Animation> {
+            teco::Animation(
+                std::vector<teco::Source> {
+                    teco::Source("source1.tcsb", "source1.tccl", "source1.tcef"),
+                    teco::Source("source2.tcsb", "source2.tccl", "source2.tcef"),
+                    teco::Source("source3.tcsb", "source3.tccl", "source3.tcef"),
+                    teco::Source("source4.tcsb", "source4.tccl", "source4.tcef")
+                },
+                teco::LOOPING,
+                2
+            )
+        }
+    );
+
+    sprite_x = 0;
+
+    return 0;
+}
+
+void tick() {
+    sprite.update_animations();
+    sprite_x++;
+};
+
+void draw() {
+    screen.draw_sprite(6, sprite_x);
+};
+```
+
+On `Screen` you can also draw `Sources`, other `Screens`, as well as individual `chars`:
+
+```c++
+// ∅
+
+screen.draw_source(x, y, source);
+screen.draw_sprite(x, y, sprite);
+screen.draw_screen(x, y, another_screen);
+screen.draw_char(x, y, symbol, color, effect); // symbol, color and effect nedd to be chars
+screen.draw_all(x, y, symbols, colors, effects); // symbols, colors and effects nedd to be 2D vectors of chars
+
+// ∅
 ```
 
 ## Keybinds
-To check for pressed keys you need to check variable `pressed_keys`, which is `vector` with keys of `keybinds` lookup table
+To check for pressed keys you need to check variable `pressed_keys`, which is `vector` with keys of `keybinds` lookup table. After keypress of any value in `keybinds` table will be detected, in `pressed_keys` would be added corresponding key
+
+So, code to handle keybinds may look like this:
+
+```C++
+#include "teco_engine.hpp"
+#include "teco_gui.hpp"
+
+// ∅
+
+int main () {
+    teco::init();
+    teco::init_gui();
+
+    teco::keybinds = std::map<int, char> {
+        {'^', SDLK_UP},
+        {'v', SDLK_DOWN},
+        {'>', SDLK_LEFT},
+        {'<', SDLK_RIGHT}
+    };
+
+    // ∅
+
+};
+
+void tick() {
+    for (auto key : teco::pressed_keys) {
+        switch (key) {
+            case '^':
+                std::cout << "Up arrow is pressed!!!" << std::endl;
+                break;
+            case 'v':
+                std::cout << "Down arrow is pressed!!!" << std::endl;
+                break;
+            case '>':
+                std::cout << "Right arrow is pressed!!!" << std::endl;
+                break;
+            case '<':
+                std::cout << "Left arrow is pressed!!!" << std::endl;
+                break;
+        }
+    }
+
+    teco::pressed_keys.clear();
+
+    // ∅
+};
+
+// ∅
+```
+
+To handle hotkeys you can do something like this:
+
+```C++
+// ∅
+
+teco::keybinds = std::map<int, char> {
+    {'$', SDLK_LSHIFT},
+    {'w', SDLK_W}
+};
+
+// ∅
+
+void tick() {
+    std::vector<char> hotkey_potential = std::vector<char> {};
+
+    for (auto key : teco::pressed_keys) {
+        switch (key) {
+            case '$':
+                std::cout << "Shift is pressed!!!" << std::endl;
+                hotkey_potential.push_back(key);
+                break;
+            case 'w':
+                if (count(hotkey_potential.begin(), hotkey_potential.end(), '$') >= 1) {
+                    std::cout << "Shift + W is pressed!!!" << std::endl;
+                }
+                break;
+        }
+    }
+
+    teco::pressed_keys.clear();
+
+    // ∅
+};
+
+// ∅
+```
 
 ## Compilation
 For compilation see [`compilation.md`](compilation.md)
