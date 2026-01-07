@@ -20,7 +20,7 @@ Detailed instructions on how to use TeCo are in the [`documentation`](https://gi
 - C++ library for manipulating windows: [`SDL2`](https://www.libsdl.org/)
 - C++ library for manipulating console output: [`NCurses`](https://invisible-island.net/ncurses/)
 
-## Projects written using teco
+## Projects written using TeCo
 - [`Wrangler`](https://github.com/somga-core/wrangler)
 
 ## P.S.
