@@ -19,7 +19,7 @@ If you want to use window input and output (Next, GUI) you must copy [`teco_gui.
 If you want to use terminal input and output (Next, TUI) you must copy [`teco_tui.cpp`](/teco/teco_tui.cpp) and [`teco_tui.hpp`](/teco/teco_tui.hpp)
 
 ## Includes
-You must include into your project `TeCo` files to use it (Obviously). You always need to include [`teco_engine.hpp`](/teco/teco_engine.hpp). Include [`teco_gui.hpp`](/teco/teco_gui.hpp) if you want to use GUI or [`teco_tui.hpp`](/teco/teco_tui.hpp) if you want to use TUI
+You must include into your project `TeCo` files to use it (Obviously). Include [`teco_gui.hpp`](/teco/teco_gui.hpp) if you want to use GUI or [`teco_tui.hpp`](/teco/teco_tui.hpp) if you want to use TUI
 
 So your includes must look something like that:
 
@@ -50,7 +50,7 @@ In `init()` you must specify starting screen (More on that later) and also can s
 ```c++
 // ∅
 
-teco::init(screen, 60, 20, keybinds, colors, default_color, background_red, background_green, background_blue);
+teco::init(&screen, 60, 20, keybinds, colors, default_color, background_red, background_green, background_blue);
 
 // ∅
 ```
@@ -156,7 +156,7 @@ void draw() {};
 teco::Screen screen;
 
 int main() {
-    teco::init(screen);
+    teco::init(&screen);
     teco::init_gui(); // Or teco::init_tui();
 
     screen = teco::Screen(48, 14, &tick, &draw);
@@ -181,7 +181,7 @@ teco::Screen main_screen;
 teco::Screen sec_screen;
 
 int main() {
-    teco::init(main_screen);
+    teco::init(&main_screen);
     teco::init_gui(); // Or teco::init_tui();
     
     main_screen = teco::Screen(48, 14, &tick, &draw);
@@ -189,7 +189,7 @@ int main() {
 
     // ∅
 
-    teco::current_screen = sec_screen; // Switching to different screen
+    teco::current_screen = &sec_screen; // Switching to different screen
 
     return 0;
 }
@@ -351,6 +351,16 @@ teco::Sprite sprite = teco::Sprite(
 // ∅
 ```
 
+You can switch `Sprite` animation using `set_animation()` and specifying animation index
+
+```c++
+// ∅
+
+sprite.set_animation(0);
+
+// ∅
+```
+
 ## Tick and draw in mainloop
 Next you want to start mainloop. Run `mainloop_tui()` if you are using TUI, and `mainloop_gui()` if you are using GUI
 
@@ -375,7 +385,7 @@ teco::Sprite sprite;
 int sprite_x;
 
 int main() {
-    teco::init(screen);
+    teco::init(&screen);
     teco::init_gui(); // Or teco::init_tui();
 
     screen = teco::Screen(48, 14, &tick, &draw);
@@ -424,7 +434,7 @@ screen.draw_all(x, y, symbols, colors, effects); // symbols, colors and effects 
 ```
 
 ## Keybinds
-To check for pressed keys you need to check variable `pressed_keys`, which is `vector` with keys of `keybinds` lookup table. After keypress of any value in `keybinds` table will be detected, in `pressed_keys` would be added corresponding key
+To check for pressed keys you need to check variable `pressed_keys`, which is `vector` with values of `keybinds` lookup table. After keypress of any key in `keybinds` table will be detected, in `pressed_keys` would be added corresponding value
 
 So, code to handle keybinds may look like this:
 
@@ -435,14 +445,14 @@ So, code to handle keybinds may look like this:
 // ∅
 
 int main () {
-    teco::init();
+    teco::init(...);
     teco::init_gui();
 
     teco::keybinds = std::map<int, char> {
-        {'^', SDLK_UP},
-        {'v', SDLK_DOWN},
-        {'>', SDLK_LEFT},
-        {'<', SDLK_RIGHT}
+        {SDLK_UP, '^'},
+        {SDLK_DOWN, 'v'},
+        {SDLK_LEFT, '>'},
+        {SDLK_RIGHT, '<'}
     };
 
     // ∅
@@ -463,43 +473,6 @@ void tick() {
                 break;
             case '<':
                 std::cout << "Left arrow is pressed!!!" << std::endl;
-                break;
-        }
-    }
-
-    teco::pressed_keys.clear();
-
-    // ∅
-};
-
-// ∅
-```
-
-To handle hotkeys you can do something like this:
-
-```C++
-// ∅
-
-teco::keybinds = std::map<int, char> {
-    {'$', SDLK_LSHIFT},
-    {'w', SDLK_W}
-};
-
-// ∅
-
-void tick() {
-    std::vector<char> hotkey_potential = std::vector<char> {};
-
-    for (auto key : teco::pressed_keys) {
-        switch (key) {
-            case '$':
-                std::cout << "Shift is pressed!!!" << std::endl;
-                hotkey_potential.push_back(key);
-                break;
-            case 'w':
-                if (count(hotkey_potential.begin(), hotkey_potential.end(), '$') >= 1) {
-                    std::cout << "Shift + W is pressed!!!" << std::endl;
-                }
                 break;
         }
     }
