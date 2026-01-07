@@ -7,7 +7,7 @@ TUI_FLAGS=-lncurses
 
 TECO_ENGINE=./teco_engine.cpp
 TECO_GUI=./teco_gui.cpp
-TECO_TUI=./teco_tui.hpp
+TECO_TUI=./teco_tui.cpp
 
 RMCOMMAND=rm -f
 
