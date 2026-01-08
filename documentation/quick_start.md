@@ -24,7 +24,6 @@ You must include into your project `TeCo` files to use it (Obviously). Include [
 So your includes must look something like that:
 
 ```c++
-#include "teco_engine.hpp"
 #include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 // ∅
@@ -34,7 +33,6 @@ So your includes must look something like that:
 Then you need to run init functions. Always run `init()`. Use `init_gui()` for GUI and `init_tui()` for TUI:
 
 ```c++
-#include "teco_engine.hpp"
 #include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 int main() {
@@ -45,7 +43,7 @@ int main() {
 }
 ```
 
-In `init()` you must specify starting screen (More on that later) and also can specify, FPS and TPS (More on that later), keybinds (More on that later) and a few color options (More on that later):
+In `init()` you must specify starting screen (More on that later) and can specify FPS and TPS (More on that later), keybinds (More on that later) and a few color options (More on that later):
 
 ```c++
 // ∅
@@ -64,6 +62,8 @@ teco::init_gui(600, 400, "path/to/font.ttf", 20, effects);
 
 // ∅
 ```
+
+In `init_tui()` there are no arguments
 
 ## ASCII images
 `TeCo` ASCII image (Used in `Sources` and `Screens`) is stored using `symbols`, `colors` and `effects`:
@@ -147,7 +147,6 @@ In `init` function you must pass `current_screen` argument. It has `Screen` type
 To init `Screen` you need to specify width and height as well as tick and draw functions (More on that later):
 
 ```c++
-#include "teco_engine.hpp"
 #include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 void tick() {};
@@ -168,7 +167,6 @@ int main() {
 You can also init several `Screens` and switch between them later:
 
 ```c++
-#include "teco_engine.hpp"
 #include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 void main_tick() {};
@@ -311,14 +309,14 @@ teco::Animation animation = teco::Animation(
         teco::Source("source4.tcsb", "source4.tccl", "source4.tcef")
     },
     teco::LOOPING, // Or teco::STOP_ON_FIRST_FRAME or teco::STOP_ON_LAST_FRAME
-    2
+    2 // This means that between animation frame switches there will be 2 tick delay
 )
 
 // ∅
 ```
 
 ## Sprites
-`Sprite` is a class for storing and processing `Animations`. To init sprite you need to specify `vector` of `Animations` and can specify index of `Animation` in that `vector` that will be played first and it's starting frame
+`Sprite` is a class for storing and processing `Animations`. To init sprite you need to specify `vector` of `Animations` and can specify index of `Animation` from that `vector` that will be played first and it's starting frame
 
 Here is example `Sprite` initialization:
 
@@ -344,19 +342,20 @@ teco::Sprite sprite = teco::Sprite(
             4
         )
     },
-    1,
-    0
+    1, // This means that, when sprite would be initialized, second animation would be played
+    0 // This mens that, when sprite would be initialized, it's animation will start at first frame
 );
 
 // ∅
 ```
 
-You can switch `Sprite` animation using `set_animation()` and specifying animation index
+You can switch `Sprite` animation by using `set_animation()` or `force_animation()` and specifying animation index
 
 ```c++
 // ∅
 
-sprite.set_animation(0);
+sprite.set_animation(0); // This will set animation to first, only if it's not currently playing
+sprite.force_animation(0); // This will set animation to first no matter what
 
 // ∅
 ```
@@ -373,7 +372,6 @@ In your `tick` function you want to update `Sprites` animations, detect keybinds
 Here is an example:
 
 ```c++
-#include "teco_engine.hpp"
 #include "teco_gui.hpp" // Or "teco_tui.hpp"
 
 void tick();
@@ -411,11 +409,11 @@ int main() {
 
 void tick() {
     sprite.update_animations();
-    sprite_x++;
+    sprite_x++; // This will move sprite by 1 symbol to the right every tick
 };
 
 void draw() {
-    screen.draw_sprite(6, sprite_x);
+    screen.draw_sprite(sprite_x, 6);
 };
 ```
 
@@ -427,8 +425,8 @@ On `Screen` you can also draw `Sources`, other `Screens`, as well as individual 
 screen.draw_source(x, y, source);
 screen.draw_sprite(x, y, sprite);
 screen.draw_screen(x, y, another_screen);
-screen.draw_char(x, y, symbol, color, effect); // symbol, color and effect nedd to be chars
-screen.draw_all(x, y, symbols, colors, effects); // symbols, colors and effects nedd to be 2D vectors of chars
+screen.draw_char(x, y, symbol, color, effect); // symbol, color and effect need to be chars
+screen.draw_all(x, y, symbols, colors, effects); // symbols, colors and effects need to be 2D vectors of chars
 
 // ∅
 ```
@@ -439,7 +437,6 @@ To check for pressed keys you need to check variable `pressed_keys`, which is `v
 So, code to handle keybinds may look like this:
 
 ```C++
-#include "teco_engine.hpp"
 #include "teco_gui.hpp"
 
 // ∅
