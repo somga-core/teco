@@ -37,8 +37,13 @@ void teco::mainloop_tui() {
 }
 
 void teco::handle_events_tui() {
-	int ch = getch();
-	pressed_keys.push_back(keybinds[ch]);
+	int ch;
+
+	while ((ch = getch()) != ERR) {
+		if (std::count(pressed_keys.begin(), pressed_keys.end(), ch) < 1)
+			pressed_keys.push_back(keybinds[ch]);
+	}
+	
 	flushinp();
 }
 

@@ -474,10 +474,22 @@ void tick() {
         }
     }
 
-    teco::pressed_keys.clear();
-
     // ∅
 };
+
+// ∅
+```
+
+If you are using TUI you have to clear `pressed_keys` array when you are done checking it:
+
+```c++
+// ∅
+void tick() {
+
+    // ∅
+
+    teco::pressed_keys.clear();
+}
 
 // ∅
 ```
