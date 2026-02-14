@@ -126,6 +126,8 @@ teco::colors = std::map<char, std::vector<unsigned char>> {
 And here is example `effects`:
 
 ```c++
+// ∅
+
 std::vector<float> some_effect(int x, int y, int tick_count);
 std::vector<float> other_effect(int x, int y, int tick_count);
 
@@ -135,6 +137,8 @@ teco::effects = std::map<char, std::vector<float> (*) (int, int, int)> {
   {'#', some_effect},
   {'&', other_effect}
 }
+
+// ∅
 ```
 
 You can find effect examples in [`examples/effect_switcher`](/examples/effect_switcher)
@@ -484,6 +488,7 @@ If you are using TUI you have to clear `pressed_keys` array when you are done ch
 
 ```c++
 // ∅
+
 void tick() {
 
     // ∅
