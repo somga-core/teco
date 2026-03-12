@@ -1,5 +1,7 @@
 ![logo](https://cdn.imgchest.com/files/972ac40f0a8b.png) \
 ![GitHub Created At](https://img.shields.io/github/created-at/somga-core/teco) ![GitHub last commit](https://img.shields.io/github/last-commit/somga-core/teco) ![GitHub Release Date](https://img.shields.io/github/release-date/somga-core/teco) \
+
+## What is this
 TeCo (Terminal core) is a C++ game engine for making ASCII-styled games
 
 ## Features
