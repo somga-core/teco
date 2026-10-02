@@ -1,0 +1,29 @@
+A FUCKING TODO LIST
+
+What we don't want:
+
+ - Bloated sprite and animations system
+
+ - Selecting output mode at runtime and start of a program
+
+ - Embeded mainloop system
+
+What we want:
+
+ - More flexible symbols drawing system (Single-symbol operations on
+   a screen, area filling operations)
+
+ - Unified key and maybe mouse handling system across two output modes
+
+ - One-headder file
+
+ - Gorgeous and beautiful effect system
+
+ - One file per full image (Colors and effects included)
+
+ - Only one class (Structure): image (With ability to plot data from
+   file and other images on it and show it on screen)
+
+ - Ability to manipulate SLD2 and NCurses
+
+ - Sane system for color manipulations
