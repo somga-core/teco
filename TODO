@@ -8,12 +8,10 @@ What we don't want:
 
  - Embeded mainloop system
 
-What we want:
+What we 100% want:
 
  - More flexible symbols drawing system (Single-symbol operations on
    a screen, area filling operations)
-
- - Unified key and maybe mouse handling system across two output modes
 
  - One-headder file
 
@@ -27,3 +25,8 @@ What we want:
  - Ability to manipulate SLD2 and NCurses
 
  - Sane system for color manipulations
+
+What we maybe don't want:
+
+ - Unified key, and maybe mouse handling systems across two output
+   modes and maybe sounds in gui
