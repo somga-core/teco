@@ -10,22 +10,18 @@ typedef struct teco_image {
 } teco_image;
 
 teco_image teco_image_create(unsigned _width, unsigned _height);
+void teco_image_delete(teco_image* image);
 
-inline void teco_image_resize(teco_image* image, unsigned new_height, unsigned new_width);
+void teco_image_resize(teco_image* image, unsigned new_height, unsigned new_width);
 
 void teco_image_import(teco_image* image, char* path);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, unsigned x, unsigned y);
 
-inline void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned y);
-
+void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned y);
 void teco_image_rect_symbol(teco_image* image, char symbol, unsigned x1, unsigned y1, unsigned x2, unsigned y2);
-
 void teco_image_fill_symbol(teco_image* image, char symbol);
 
-inline void teco_image_delete(teco_image* image);
-
 void teco_image_draw(teco_image* image);
-
 void teco_image_print(teco_image* image);
 
 // IMPLEMENTATION!!!!!
@@ -43,7 +39,7 @@ teco_image teco_image_create(unsigned _width, unsigned _height) {
     return image;
 };
 
-inline void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned y) {
+void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned y) {
     (image->symbols)[image->width * y + x] = symbol;
 };
 

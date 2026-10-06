@@ -30,3 +30,8 @@ What we maybe don't want:
 
  - Unified key, and maybe mouse handling systems across two output
    modes and maybe sounds in gui
+
+A few concerns about structure present in the files:
+
+ - Do we need to declare several small function as "static inline"
+   or not
