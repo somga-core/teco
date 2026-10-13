@@ -12,7 +12,7 @@ typedef struct teco_image {
 teco_image teco_image_create(unsigned _width, unsigned _height);
 void teco_image_delete(teco_image* image);
 
-void teco_image_resize(teco_image* image, unsigned new_height, unsigned new_width);
+void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
 
 void teco_image_import(teco_image* image, char* path);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
@@ -36,9 +36,25 @@ teco_image teco_image_create(unsigned _width, unsigned _height) {
     image.colors = malloc(size);
     image.effects = malloc(size);
 
-    teco_image_fill_symbol(&image, ' ');
+    teco_image_fill_symbol(&image, '\0');
 
     return image;
+};
+
+void teco_image_delete(teco_image* image) {
+    free(image->symbols);
+    free(image->colors);
+    free(image->effects);
+};
+
+void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height) {
+    teco_image new_image = teco_image_create(new_width, new_height);
+
+    teco_image_apply(&new_image, image, 0, 0);
+
+    teco_image_delete(image);
+
+    *image = new_image;
 };
 
 char teco_image_get_symbol(teco_image* image, unsigned x, unsigned y) {
@@ -50,45 +66,55 @@ void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned 
 };
 
 void teco_image_apply(teco_image* canvas, teco_image* image, long x, long y) {
-    unsigned canvas_x, canvas_y = 0;
-    unsigned image_xr, image_yu, image_xl, image_yd = 0;
+    if (
+        x >= (long) canvas->width ||
+        y >= (long) canvas->height ||
+        x + ((long) image->width) <= 0 ||
+        y + ((long) image->height) <= 0
+    ) {
+        return;
+    };
 
+    unsigned image_xl = 0, image_xr = 0, canvas_x = 0;
+    unsigned image_yu = 0, image_yd = 0, canvas_y = 0;
+
+    // Crop x
     if (x < 0) {
-        canvas_x = 0;
         image_xl = -x;
     } else {
         canvas_x = x;
-        image_xl = 0;
     }
-    
+
+    if (x + image->width > canvas->width) {
+        image_xr = canvas->width - x;
+    } else {
+        image_xr = image->width;
+    }
+
+    // Crop y
     if (y < 0) {
-        canvas_y = 0;
         image_yu = -y;
     } else {
         canvas_y = y;
-        image_yu = 0;
     }
 
-    if (y + image->height < canvas->height) {
+    if (y + image->height > canvas->height) {
+        image_yd = canvas->height - y;
+    } else {
         image_yd = image->height;
-    } else {
-        image_yd = image->height - (y + image->height - canvas->height);
-    }
-    
-    if (x + image->width < canvas->width) {
-        image_xr = image->width;
-    } else {
-        image_xr = image->width - (x + image->width - canvas->width);
     }
 
-    printf("c: %u %u iul: %u %u idr: %u %u\n", canvas_x, canvas_y, image_xl, image_yu, image_xr, image_yd);
+    // Draw
+    for (unsigned dy = image_yu; dy < image_yd; dy++) {
+        for (unsigned dx = image_xl; dx < image_xr; dx++) {
+            char symbol = teco_image_get_symbol(image, dx, dy);
 
-    for (unsigned y = image_yu; y < image_yd; y++) {
-        for (unsigned x = image_xl; x < image_xr; x++) {
-            teco_image_set_symbol(
-                canvas, teco_image_get_symbol(image, x, y),
-                x + canvas_x - image_xl, y + canvas_y - image_yu
-            );
+            if (symbol != '\0') {
+                teco_image_set_symbol(
+                    canvas, symbol,
+                    dx + canvas_x - image_xl, dy + canvas_y - image_yu
+                );
+            }
         }
     }
 };

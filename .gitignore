@@ -1,4 +1,5 @@
 .vscode
 exc
-a.exe
+exc.exe
+make.bat
 *.swp

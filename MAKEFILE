@@ -1,0 +1,16 @@
+CC=gcc
+INPUT=./example.c
+OUTPUT=./exc
+
+RMCOMMAND=rm -f
+
+.PHONY: all gui tui run clean
+
+all: clean 
+	$(CC) -o $(OUTPUT) $(INPUT)
+
+run: all
+	$(OUTPUT)
+
+clean:
+	$(RMCOMMAND) $(OUTPUT)

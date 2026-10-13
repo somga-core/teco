@@ -10,6 +10,8 @@ What we don't want:
 
 What we 100% want:
 
+ - Change output mode by changing only one "#define"
+
  - More flexible symbols drawing system (Single-symbol operations on
    a screen, area filling operations)
 
@@ -25,6 +27,8 @@ What we 100% want:
  - Ability to manipulate SLD2 and NCurses
 
  - Sane system for color manipulations
+
+ - Empty symbol embeded in image format
 
 What we maybe don't want:
 
