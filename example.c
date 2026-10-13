@@ -7,10 +7,9 @@ int main() {
 
     teco_image image2 = teco_image_create(11, 11);
     for (char i = 0; i < 11; i++) {
-        teco_image_set_symbol(&image2, i + 96, i, i);
+        teco_image_set_symbol(&image2, i + 97, i, i);
     }
-
-    teco_image_resize(&image2, 9, 9);
+    teco_image_resize(&image2, 10, 10);
 
     teco_image_print(&image1);
 

@@ -10,6 +10,7 @@ typedef struct teco_image {
 } teco_image;
 
 teco_image teco_image_create(unsigned _width, unsigned _height);
+teco_image teco_image_copy(teco_image* image);
 void teco_image_delete(teco_image* image);
 
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
@@ -39,6 +40,22 @@ teco_image teco_image_create(unsigned _width, unsigned _height) {
     teco_image_fill_symbol(&image, '\0');
 
     return image;
+};
+
+teco_image teco_image_copy(teco_image* image) {
+    teco_image new_image = {.width=image->width, .height=image->height};
+
+    for (unsigned y = 0; y < image->height; y++) {
+        for (unsigned x = 0; x < image->width; x++) {
+            teco_image_set_symbol(
+                &new_image,
+                teco_image_get_symbol(image, x, y),
+                x, y
+            );
+        }
+    }
+
+    return new_image;
 };
 
 void teco_image_delete(teco_image* image) {
@@ -111,8 +128,10 @@ void teco_image_apply(teco_image* canvas, teco_image* image, long x, long y) {
 
             if (symbol != '\0') {
                 teco_image_set_symbol(
-                    canvas, symbol,
-                    dx + canvas_x - image_xl, dy + canvas_y - image_yu
+                    canvas,
+                    symbol,
+                    dx + canvas_x - image_xl,
+                    dy + canvas_y - image_yu
                 );
             }
         }
