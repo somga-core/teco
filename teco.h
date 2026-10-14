@@ -19,6 +19,8 @@ void teco_image_import(teco_image* image, char* path);
 void teco_image_export(teco_image* image, char* path);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
 
+void teco_image_apply_symbols(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
+
 char teco_image_get_symbol(teco_image* image, unsigned x, unsigned y);
 
 void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned y);
