@@ -139,6 +139,7 @@ void teco_image_rect(teco_image* image, char* layers, char* characters, long xl,
                 teco_image_set(image, *layer, characters[i], x, y);
             }
         }
+        
         i++;
     }
 };
@@ -152,6 +153,7 @@ void teco_image_fill(teco_image* image, char* layers, char* characters) {
                 teco_image_set(image, *layer, characters[i], x, y);
             }
         }
+
         i++;
     }
 };
@@ -160,7 +162,9 @@ void teco_image_print(teco_image* image, char* layers) {
     for (char* layer = layers; *layer != '\0'; layer++) {
         for (unsigned y = 0; y < image->height; y++) {
             for (unsigned x = 0; x < image->width; x++) {
-                printf("%c", teco_image_get(image, *layer, x, y));
+                char character = teco_image_get(image, *layer, x, y);
+                
+                character == '\0' ? printf(" ") : printf("%c", character);
             }
             printf("\n");
         }
