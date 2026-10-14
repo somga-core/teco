@@ -16,6 +16,7 @@ void teco_image_delete(teco_image* image);
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
 
 void teco_image_import(teco_image* image, char* path);
+void teco_image_export(teco_image* image, char* path);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
 
 char teco_image_get_symbol(teco_image* image, unsigned x, unsigned y);
