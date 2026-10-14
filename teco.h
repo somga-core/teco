@@ -22,8 +22,8 @@ void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply,
 void teco_image_apply_symbols(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
 
 char teco_image_get_symbol(teco_image* image, unsigned x, unsigned y);
-
 void teco_image_set_symbol(teco_image* image, char symbol, unsigned x, unsigned y);
+
 void teco_image_rect_symbol(teco_image* image, char symbol, long x1, long y1, long x2, long y2);
 void teco_image_fill_symbol(teco_image* image, char symbol);
 
