@@ -9,7 +9,7 @@
 // DECLARATION!!!!!
 typedef struct teco_image {
     unsigned width; unsigned height;
-    char* data[3];
+    char* data[TECO_LAYERS];
 } teco_image;
 
 teco_image teco_image_create(unsigned _width, unsigned _height);
@@ -59,11 +59,11 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
 };
 
 char teco_image_get(teco_image* image, char layer, unsigned x, unsigned y) {
-    return image->data[layer % 3][image->width * y + x];
+    return image->data[layer % TECO_LAYERS][image->width * y + x];
 };
 
 void teco_image_set(teco_image* image, char layer, char character, unsigned x, unsigned y) {
-    image->data[layer % 3][image->width * y + x] = character;
+    image->data[layer % TECO_LAYERS][image->width * y + x] = character;
 };
 
 void teco_image_apply(teco_image* canvas, teco_image* image, char* layers, long x, long y) {
