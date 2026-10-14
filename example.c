@@ -18,7 +18,7 @@ int main() {
 
     teco_image_print(&image1, "s");
 
-    printf("DAMN!!! s%u e%u c%u x%u\n", 's' % 3, 'e' % 3, 'c' % 3, 'x' % 3);
+    printf("DAMN!!! Pure gambling: s%u e%u c%u x%u\n", 's' % 3, 'e' % 3, 'c' % 3, 'x' % 3);
 
     return 0;
 }
