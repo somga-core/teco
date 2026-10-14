@@ -165,7 +165,7 @@ void teco_image_fill_symbol(teco_image* image, char symbol) {
 void teco_image_print(teco_image* image) {
     for (unsigned y = 0; y < image->height; y++) {
         for (unsigned x = 0; x < image->width; x++) {
-            printf("%c", (image->symbols)[image->width * y + x]);
+            printf("%c", teco_image_get_symbol(image, x, y));
         }
         printf("\n");
     }
