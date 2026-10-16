@@ -59,11 +59,49 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
 };
 
 char teco_image_get(teco_image* image, char layer, unsigned x, unsigned y) {
-    return image->data[layer % TECO_LAYERS][image->width * y + x];
+    unsigned char layer_index;
+
+    switch (layer) {
+        case 's':
+            layer_index = 0;
+            break;
+            
+        case 'c':
+            layer_index = 1;
+            break;
+            
+        case 'e':
+            layer_index = 2;
+            break;
+        
+        default:
+            break;
+    }
+
+    return image->data[layer_index][image->width * y + x];
 };
 
 void teco_image_set(teco_image* image, char layer, char character, unsigned x, unsigned y) {
-    image->data[layer % TECO_LAYERS][image->width * y + x] = character;
+    unsigned char layer_index;
+
+    switch (layer) {
+        case 's':
+            layer_index = 0;
+            break;
+            
+        case 'c':
+            layer_index = 1;
+            break;
+            
+        case 'e':
+            layer_index = 2;
+            break;
+        
+        default:
+            break;
+    }
+
+    image->data[layer_index][image->width * y + x] = character;
 };
 
 void teco_image_apply(teco_image* canvas, teco_image* image, char* layers, long x, long y) {
