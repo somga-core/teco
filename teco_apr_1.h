@@ -61,6 +61,7 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
 char teco_image_get(teco_image* image, char layer, unsigned x, unsigned y) {
     unsigned char layer_index;
 
+    // Mod 3 is a really good coincidence, but it's less optimised than just switch-case
     switch (layer) {
         case 's':
             layer_index = 0;

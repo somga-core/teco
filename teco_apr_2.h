@@ -7,6 +7,7 @@
 #define TECO_LAYER_BITS 2
 #define TECO_LAYER_MASK 0b11
 
+// Maybe use this...
 #define TECO_S 0b01
 #define TECO_C 0b10
 #define TECO_E 0b11
@@ -24,6 +25,19 @@
 #define TECO_ESC 0b100111
 #define TECO_CES 0b001110
 #define TECO_ECS 0b001011
+
+// ...or this. But readability with this way is worse
+#define TECO_S 0b01
+#define TECO_C 0b10
+#define TECO_E 0b11
+
+#define TECO_XS 0b0100
+#define TECO_XC 0b1000
+#define TECO_XE 0b1100
+
+#define TECO_XXS 0b0100
+#define TECO_XXC 0b1000
+#define TECO_XXE 0b1100
 
 // DECLARATION!!!!!
 typedef struct teco_image {
@@ -125,10 +139,11 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
     }
 
     // Draw
-    unsigned char layer;
-    for (unsigned char shifted = layers; shifted != 0; shifted = shifted >> TECO_LAYER_BITS) {
-        layer = shifted & TECO_LAYER_MASK;
-
+    for (
+        unsigned char layer, shifted = layers;
+        (layer = shifted & TECO_LAYER_MASK) != 0;
+        shifted = shifted >> TECO_LAYER_BITS
+    ) {
         for (unsigned dy = image_yu; dy < image_yd; dy++) {
             for (unsigned dx = image_xl; dx < image_xr; dx++) {
                 char character = teco_image_get(image, layer, dx, dy);
@@ -153,12 +168,11 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
     if (yu < 0) yu = 0;
     if (yd >= image->height) yd = image->height - 1;
     
-    unsigned char i = 0;
-    unsigned char layer;
-
-    for (unsigned char shifted = layers; shifted != 0; shifted = shifted >> TECO_LAYER_BITS) {
-        layer = shifted & TECO_LAYER_MASK;
-
+    for (
+        unsigned char i = 0, layer, shifted = layers;
+        (layer = shifted & TECO_LAYER_MASK) != 0;
+        shifted = shifted >> TECO_LAYER_BITS
+    ) {
         for (unsigned y = yu; y <= yd; y++) {
             for (unsigned x = xl; x <= xr; x++) {
                 teco_image_set(image, layer, characters[i], x, y);
@@ -170,12 +184,11 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
 };
 
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters) {
-    unsigned char i = 0;
-    unsigned char layer;
-    
-    for (unsigned char shifted = layers; shifted != 0; shifted = shifted >> TECO_LAYER_BITS) {
-        layer = shifted & TECO_LAYER_MASK;
-
+    for (
+        unsigned char i = 0, layer, shifted = layers;
+        (layer = shifted & TECO_LAYER_MASK) != 0;
+        shifted = shifted >> TECO_LAYER_BITS
+    ) {
         for (unsigned y = 0; y < image->height; y++) {
             for (unsigned x = 0; x < image->width; x++) {
                 teco_image_set(image, layer, characters[i], x, y);
@@ -187,11 +200,12 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
 };
 
 void teco_image_print(teco_image* image, unsigned char layers) {
-    unsigned char layer;
-    
-    for (unsigned char shifted = layers; shifted != 0; shifted = shifted >> TECO_LAYER_BITS) {
-        layer = shifted & TECO_LAYER_MASK;
-        
+
+    for (
+        unsigned char layer, shifted = layers;
+        (layer = shifted & TECO_LAYER_MASK) != 0;
+        shifted = shifted >> TECO_LAYER_BITS
+    ) {
         for (unsigned y = 0; y < image->height; y++) {
             for (unsigned x = 0; x < image->width; x++) {
                 char character = teco_image_get(image, layer, x, y);
