@@ -15,7 +15,7 @@ void teco_image_delete(teco_image* image);
 
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
 
-void teco_image_import(teco_image* image, char* path);
+teco_image teco_image_import(char* path);
 void teco_image_export(teco_image* image, char* path);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
 
@@ -75,6 +75,69 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
     teco_image_delete(image);
 
     *image = new_image;
+};
+
+teco_image teco_image_import(char* path) {
+	teco_image image;
+	char buffer = 0;
+	FILE* file_stream = fopen(path, "r");
+
+	if (file_stream) {
+		unsigned width_length = 0;
+		unsigned height_length = 0;
+
+		while ((buffer = getc(file_stream)) != '\n');
+		width_length = ftell(file_stream) - 1;
+		while ((buffer = getc(file_stream)) != '\n');
+		height_length = ftell(file_stream) - width_length - 2;
+
+		char width_string[width_length+1];
+		char height_string[height_length+1];
+
+		fseek(file_stream, 0, SEEK_SET);
+		while ((buffer = getc(file_stream)) != '\n')
+			width_string[ftell(file_stream)-1] = buffer;
+		while ((buffer = getc(file_stream)) != '\n')
+			height_string[ftell(file_stream)-width_length-2] = buffer;
+
+		width_string[width_length] = '\0';
+		height_string[height_length] = '\0';
+
+		image = teco_image_create(strtoull(width_string, NULL, 10), strtoull(height_string, NULL, 10));
+
+		for (unsigned long long position = 0; position < image.width*image.height; position++) {
+			buffer = getc(file_stream);
+			if (buffer == '\n')
+				position--;
+			else
+				image.symbols[position] = buffer;
+		}
+
+		for (unsigned long long position = 0; position < image.width*image.height; position++) {
+			buffer = getc(file_stream);
+			if (buffer == '\n')
+				position--;
+			else
+				image.colors[position] = buffer;
+		}
+
+		for (unsigned long long position = 0; position < image.width*image.height; position++) {
+			buffer = getc(file_stream);
+			if (buffer == '\n')
+				position--;
+			else
+				image.effects[position] = buffer;
+		}
+
+		fclose(file_stream);
+
+		return image;
+	}
+
+	else {
+		image = teco_image_create(0, 0);
+		return image;
+	}
 };
 
 char teco_image_get_symbol(teco_image* image, unsigned x, unsigned y) {
