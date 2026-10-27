@@ -23,8 +23,8 @@
 #define TECO_SEC 0b101101
 #define TECO_CSE 0b110110
 #define TECO_ESC 0b100111
-#define TECO_CES 0b001110
-#define TECO_ECS 0b001011
+#define TECO_CES 0b011110
+#define TECO_ECS 0b011011
 
 // ...or this. But readability with this way is worse
 #define TECO_S 0b01
@@ -138,7 +138,7 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
     for (
         unsigned char layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
-        shifted = shifted >> TECO_LAYER_BITS
+        shifted >>= TECO_LAYER_BITS
     ) {
         for (unsigned dy = image_yu; dy < image_yd; dy++) {
             for (unsigned dx = image_xl; dx < image_xr; dx++) {
@@ -163,11 +163,11 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
     if (xr >= image->width) xr = image->width - 1;
     if (yu < 0) yu = 0;
     if (yd >= image->height) yd = image->height - 1;
-    
+
     for (
         unsigned char i = 0, layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
-        shifted = shifted >> TECO_LAYER_BITS
+        shifted >>= TECO_LAYER_BITS
     ) {
         for (unsigned y = yu; y <= yd; y++) {
             for (unsigned x = xl; x <= xr; x++) {
@@ -183,7 +183,7 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
     for (
         unsigned char i = 0, layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
-        shifted = shifted >> TECO_LAYER_BITS
+        shifted >>= TECO_LAYER_BITS
     ) {
         for (unsigned y = 0; y < image->height; y++) {
             for (unsigned x = 0; x < image->width; x++) {
@@ -200,7 +200,7 @@ void teco_image_print(teco_image* image, unsigned char layers) {
     for (
         unsigned char layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
-        shifted = shifted >> TECO_LAYER_BITS
+        shifted >>= TECO_LAYER_BITS
     ) {
         for (unsigned y = 0; y < image->height; y++) {
             for (unsigned x = 0; x < image->width; x++) {
