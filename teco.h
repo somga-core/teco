@@ -38,6 +38,7 @@ char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y);
 
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
+void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
 
 void teco_image_print(teco_image* image, unsigned char layers);
