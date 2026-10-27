@@ -234,7 +234,6 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
 };
 
 void teco_image_print(teco_image* image, unsigned char layers) {
-
     for (
         unsigned char layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
