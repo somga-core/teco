@@ -79,22 +79,22 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
 
 teco_image teco_image_import(char* path) {
     unsigned width = 0, height = 0;
-	char buffer, space_symbol;
+	char buffer, empty_symbol;
 	FILE* file_stream = fopen(path, "r");
 
 	if (!file_stream) return teco_image_create(0, 0);
 
-    fscanf(file_stream, "%u\n%u\n%c\n", &width, &height, &space_symbol); // Source: https://metanit.com/c/tutorial/7.5.php
+    fscanf(file_stream, "%u\n%u\n%c\n", &width, &height, &empty_symbol); // Source: https://metanit.com/c/tutorial/7.5.php
     teco_image image = teco_image_create(width, height);
 
     for (unsigned y = 0; y < image.height; y++) {
         unsigned x = 0;
 
         while ((buffer = getc(file_stream)) != '\n' && x < image.width) {
-            if (buffer == space_symbol)
-                teco_image_set_symbol(&image, ' ', x, y);
-            else if (buffer != ' ')
+            // Maybe invert this behavour and specify in file not an empty symbol, but a space symbol
+            if (buffer != empty_symbol)
                 teco_image_set_symbol(&image, buffer, x, y);
+            
             ++x;
         }
     }
