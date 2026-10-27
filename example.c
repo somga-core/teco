@@ -22,7 +22,8 @@ int main() {
 	*/
 
 	teco_image cartinca = teco_image_import("example.thebestfuckingformat");
-	teco_image_print(&cartinca);
+	teco_image_print(&cartinca, ' ');
+	teco_image_print(&cartinca, '.');
 
     return 0;
 }
