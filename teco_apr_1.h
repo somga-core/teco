@@ -14,11 +14,11 @@ typedef struct teco_image {
 
 teco_image teco_image_create(unsigned _width, unsigned _height);
 teco_image teco_image_copy(teco_image* image, char* layers);
-void teco_image_delete(teco_image* image);
+teco_image teco_image_import(char* path, char* layers);
 
+void teco_image_delete(teco_image* image);
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
 
-teco_image teco_image_import(char* path, char* layers);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, char* layers, long x, long y);
 
 char teco_image_get(teco_image* image, char layer, unsigned x, unsigned y);
