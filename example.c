@@ -29,7 +29,7 @@ int main() {
     teco_image_apply(&background, &object, 3, 3);
 	
     teco_image_print(&background, ' ');
-    teco_image_print(&object, '$');
+    teco_image_print(&object, '@');
 
     return 0;
 }
