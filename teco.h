@@ -30,7 +30,7 @@ teco_image teco_image_import(char* path, unsigned char layers);
 void teco_image_delete(teco_image* image);
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
 
-void teco_image_export(teco_image* image, char* path);
+void teco_image_export(teco_image* image, char* path, char space_symbol);
 
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, unsigned char layers, long x, long y);
 
@@ -129,6 +129,32 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
     teco_image_delete(image);
 
     *image = new_image;
+};
+
+void teco_image_export(teco_image* image, char* path, char space_symbol) {
+    FILE* file_stream = fopen(path, "w");
+    
+	if (!file_stream) return;
+
+    fprintf(file_stream, "%u\n%u\n%c\n", image->width, image->height, space_symbol);
+
+    for (unsigned char layer = 1; layer <= TECO_LAYERS; layer++) {
+        for (unsigned y = 0; y < image->height; y++) {
+            for (unsigned x = 0; x < image->width; x++) {
+                char character = teco_image_get(image, layer, x, y);
+
+                if (character == '\0')
+                    fputc(' ', file_stream);
+                else if (character == ' ')
+                    fputc(space_symbol, file_stream);
+                else
+                    fputc(character, file_stream);
+            }
+            fputc('\n', file_stream);
+        }
+    }
+    
+    fclose(file_stream);
 };
 
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y) {

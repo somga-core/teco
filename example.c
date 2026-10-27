@@ -30,5 +30,7 @@ int main() {
     printf("background:\n");
     teco_image_print(&background, TECO_SCE);
 
+    teco_image_export(&background, "super_export.thebestfuckingformat", '$');
+
     return 0;
 }
