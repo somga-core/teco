@@ -111,38 +111,32 @@ void teco_image_apply(teco_image* canvas, teco_image* image, char* layers, long 
         y >= (long) canvas->height ||
         x + ((long) image->width) <= 0 ||
         y + ((long) image->height) <= 0
-    ) {
-        return;
-    };
+    ) return;
 
     unsigned image_xl = 0, image_xr = 0, canvas_x = 0;
     unsigned image_yu = 0, image_yd = 0, canvas_y = 0;
 
     // Crop x
-    if (x < 0) {
+    if (x < 0)
         image_xl = -x;
-    } else {
+    else
         canvas_x = x;
-    }
 
-    if (x + image->width > canvas->width) {
+    if (x + image->width > canvas->width)
         image_xr = canvas->width - x;
-    } else {
+    else
         image_xr = image->width;
-    }
 
     // Crop y
-    if (y < 0) {
+    if (y < 0)
         image_yu = -y;
-    } else {
+    else
         canvas_y = y;
-    }
 
-    if (y + image->height > canvas->height) {
+    if (y + image->height > canvas->height)
         image_yd = canvas->height - y;
-    } else {
+    else
         image_yd = image->height;
-    }
 
     // Draw
     for (char* layer = layers; *layer != '\0'; layer++) {

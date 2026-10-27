@@ -78,69 +78,26 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
 };
 
 teco_image teco_image_import(char* path) {
-	teco_image image;
-	char buffer = 0;
+    unsigned width = 0, height = 0;
+	char buffer;
 	FILE* file_stream = fopen(path, "r");
 
-	if (file_stream) {
-        // This approach feels a bit dirty, but i don't know how to make it better
-		unsigned width_length = 0;
-		unsigned height_length = 0;
+	if (!file_stream) return teco_image_create(0, 0);
 
-		while ((buffer = getc(file_stream)) != '\n');
-		width_length = ftell(file_stream) - 1;
-		while ((buffer = getc(file_stream)) != '\n');
-		height_length = ftell(file_stream) - width_length - 2;
+    fscanf(file_stream, "%u\n%u\n", &width, &height); // Source: https://metanit.com/c/tutorial/7.5.php
+    teco_image image = teco_image_create(width, height);
 
-		char width_string[width_length+1];
-		char height_string[height_length+1];
+    for (unsigned y = 0; y < image.height; y++) {
+        unsigned x = 0;
 
-		fseek(file_stream, 0, SEEK_SET);
-		while ((buffer = getc(file_stream)) != '\n')
-			width_string[ftell(file_stream)-1] = buffer;
-		while ((buffer = getc(file_stream)) != '\n')
-			height_string[ftell(file_stream)-width_length-2] = buffer;
+        while ((buffer = getc(file_stream)) != '\n' && x < image.width) {
+            teco_image_set_symbol(&image, buffer, x, y);
+            ++x;
+        }
+    }
 
-		width_string[width_length] = '\0';
-		height_string[height_length] = '\0';
-
-		image = teco_image_create(strtoull(width_string, NULL, 10), strtoull(height_string, NULL, 10));
-
-        // If there is not enough symbols in a row, all of the data would shift
-        // Can also save two processor ticks by pre-computing image.width*image.height in a separate variable
-		for (unsigned long long position = 0; position < image.width*image.height; position++) {
-			buffer = getc(file_stream);
-			if (buffer == '\n')
-				position--;
-			else
-				image.symbols[position] = buffer;
-		}
-
-		for (unsigned long long position = 0; position < image.width*image.height; position++) {
-			buffer = getc(file_stream);
-			if (buffer == '\n')
-				position--;
-			else
-				image.colors[position] = buffer;
-		}
-
-		for (unsigned long long position = 0; position < image.width*image.height; position++) {
-			buffer = getc(file_stream);
-			if (buffer == '\n')
-				position--;
-			else
-				image.effects[position] = buffer;
-		}
-
-		fclose(file_stream);
-
-		return image;
-	}
-
-	else { // Unnecessary else statement
-		image = teco_image_create(0, 0);
-		return image;
-	}
+    fclose(file_stream);
+    return image;
 };
 
 char teco_image_get_symbol(teco_image* image, unsigned x, unsigned y) {
@@ -157,38 +114,32 @@ void teco_image_apply(teco_image* canvas, teco_image* image, long x, long y) {
         y >= (long) canvas->height ||
         x + ((long) image->width) <= 0 ||
         y + ((long) image->height) <= 0
-    ) {
-        return;
-    };
+    ) return;
 
     unsigned image_xl = 0, image_xr = 0, canvas_x = 0;
     unsigned image_yu = 0, image_yd = 0, canvas_y = 0;
 
     // Crop x
-    if (x < 0) {
+    if (x < 0)
         image_xl = -x;
-    } else {
+    else
         canvas_x = x;
-    }
 
-    if (x + image->width > canvas->width) {
+    if (x + image->width > canvas->width)
         image_xr = canvas->width - x;
-    } else {
+    else
         image_xr = image->width;
-    }
 
     // Crop y
-    if (y < 0) {
+    if (y < 0)
         image_yu = -y;
-    } else {
+    else
         canvas_y = y;
-    }
 
-    if (y + image->height > canvas->height) {
+    if (y + image->height > canvas->height)
         image_yd = canvas->height - y;
-    } else {
+    else
         image_yd = image->height;
-    }
 
     // Draw
     for (unsigned dy = image_yu; dy < image_yd; dy++) {
