@@ -15,7 +15,7 @@ void teco_image_delete(teco_image* image);
 
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
 
-teco_image teco_image_import(char* path);
+teco_image teco_image_import(char* path); // Maybe call this "load" (For no reason)
 void teco_image_export(teco_image* image, char* path);
 void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, long x, long y);
 
@@ -83,6 +83,7 @@ teco_image teco_image_import(char* path) {
 	FILE* file_stream = fopen(path, "r");
 
 	if (file_stream) {
+        // This approach feels a bit dirty, but i don't know how to make it better
 		unsigned width_length = 0;
 		unsigned height_length = 0;
 
@@ -105,6 +106,8 @@ teco_image teco_image_import(char* path) {
 
 		image = teco_image_create(strtoull(width_string, NULL, 10), strtoull(height_string, NULL, 10));
 
+        // If there is not enough symbols in a row, all of the data would shift
+        // Can also save two processor ticks by pre-computing image.width*image.height in a separate variable
 		for (unsigned long long position = 0; position < image.width*image.height; position++) {
 			buffer = getc(file_stream);
 			if (buffer == '\n')
@@ -134,7 +137,7 @@ teco_image teco_image_import(char* path) {
 		return image;
 	}
 
-	else {
+	else { // Unnecessary else statement
 		image = teco_image_create(0, 0);
 		return image;
 	}
