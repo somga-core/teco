@@ -35,9 +35,9 @@
 #define TECO_XC 0b1000
 #define TECO_XE 0b1100
 
-#define TECO_XXS 0b0100
-#define TECO_XXC 0b1000
-#define TECO_XXE 0b1100
+#define TECO_XXS 0b010000
+#define TECO_XXC 0b100000
+#define TECO_XXE 0b110000
 
 // DECLARATION!!!!!
 typedef struct teco_image {
