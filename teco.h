@@ -262,7 +262,8 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
 // DECLARATION!!!
 typedef struct teco_window teco_window;
 
-teco_window teco_window_create();
+teco_window teco_window_create(unsigned width, unsigned height, char* title);
+teco_window teco_window_color_palette_add(char character, unsigned char red, unsigned char green, unsigned char blue);
 
 void teco_image_draw(teco_window* window, teco_image* image);
 
@@ -278,8 +279,10 @@ void teco_image_draw(teco_window* window, teco_image* image);
 
 #else
 
+// DECLARATION!!!
 void teco_image_print(teco_image* image, unsigned char layers);
 
+// IMPLEMENTATION!!!
 void teco_image_print(teco_image* image, unsigned char layers) {
     for (
         unsigned char layer, shifted = layers;
