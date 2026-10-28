@@ -23,14 +23,14 @@ int main() {
     teco_image background = teco_image_copy(&image1, TECO_SC);
     teco_image_fill(&background, TECO_E, "&");
 
-    teco_image object = teco_image_import("example.thebestfuckingformat", TECO_SCE);
+    teco_image object = teco_image_import("example.tci", TECO_SCE);
 
     teco_image_apply(&background, &object, TECO_SCE, 1, 1);
 
     printf("background:\n");
     teco_image_print(&background, TECO_SCE);
 
-    teco_image_export(&background, "super_export.thebestfuckingformat", '$');
+    teco_image_export(&background, "super_export.tci", ':');
 
     return 0;
 }

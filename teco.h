@@ -89,7 +89,7 @@ teco_image teco_image_import(char* path, unsigned char layers) {
 
     if (!file_stream) return teco_image_create(0, 0);
 
-    fscanf(file_stream, "%u\n%u\n%c\n", &width, &height, &space_symbol);
+    fscanf(file_stream, "%u %u %c\n", &width, &height, &space_symbol);
     teco_image image = teco_image_create(width, height);
 
     for (
