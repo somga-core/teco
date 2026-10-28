@@ -1,3 +1,6 @@
+#ifndef TECO
+#define TECO
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -292,5 +295,7 @@ void teco_image_print(teco_image* image, unsigned char layers) {
         printf("\n");
     }
 };
+
+#endif
 
 #endif
