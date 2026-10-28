@@ -81,7 +81,8 @@ teco_image teco_image_copy(teco_image* image, unsigned char layers) {
 teco_image teco_image_import(char* path, unsigned char layers) {
     unsigned width = 0, height = 0;
     char buffer;
-    // All "space" synbols in file will become spaces in image, and all spaces symbols in file will become '\0' in image
+    // All "space" synbols in file will become spaces in image,
+    // all spaces in file will become '\0' in image
     char space_symbol;
     FILE* file_stream = fopen(path, "r");
 
@@ -101,12 +102,10 @@ teco_image teco_image_import(char* path, unsigned char layers) {
                 (buffer = getc(file_stream)) != '\n' && x < image.width;
                 x++
             ) {
-                if (buffer == EOF) {
-                    fclose(file_stream);
-                    return image;
-                }
+                if (buffer == EOF) goto teco_image_import_end;
 
-                // Maybe invert this behavour and specify in a file not a space symbol, but an empty symbol
+                // Maybe invert this behavour and specify in a
+                // file not a space symbol, but an empty symbol
                 if (buffer == space_symbol)
                     teco_image_set(&image, layer, ' ', x, y);
                 else if (buffer != ' ')
@@ -115,6 +114,7 @@ teco_image teco_image_import(char* path, unsigned char layers) {
         }
     }
 
+teco_image_import_end:
     fclose(file_stream);
     return image;
 };
@@ -137,7 +137,7 @@ void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_heigh
 void teco_image_export(teco_image* image, char* path, char space_symbol) {
     FILE* file_stream = fopen(path, "w");
     
-	if (!file_stream) return;
+    if (!file_stream) return;
 
     fprintf(file_stream, "%u %u %c\n", image->width, image->height, space_symbol);
 
