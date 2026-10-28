@@ -50,9 +50,8 @@ teco_image teco_image_create(unsigned width, unsigned height) {
 
     unsigned long long size = width * height;
 
-    for (char layer = 0; layer < TECO_LAYERS; layer++) {
+    for (char layer = 0; layer < TECO_LAYERS; layer++)
         image.data[layer] = malloc(size);
-    }
 
     teco_image_fill(&image, TECO_SCE, "\0\0\0");
 
@@ -83,12 +82,12 @@ teco_image teco_image_copy(teco_image* image, unsigned char layers) {
 
 teco_image teco_image_import(char* path, unsigned char layers) {
     unsigned width = 0, height = 0;
-	char buffer;
+    char buffer;
     // All "space" synbols in file will become spaces in image, and all spaces symbols in file will become '\0' in image
     char space_symbol;
-	FILE* file_stream = fopen(path, "r");
+    FILE* file_stream = fopen(path, "r");
 
-	if (!file_stream) return teco_image_create(0, 0);
+    if (!file_stream) return teco_image_create(0, 0);
 
     fscanf(file_stream, "%u\n%u\n%c\n", &width, &height, &space_symbol);
     teco_image image = teco_image_create(width, height);
@@ -99,15 +98,16 @@ teco_image teco_image_import(char* path, unsigned char layers) {
         shifted >>= TECO_LAYER_BITS
     ) {
         for (unsigned y = 0; y < image.height; y++) {
-            unsigned x = 0;
-
-            while ((buffer = getc(file_stream)) != '\n' && x < image.width) {
+            for (
+                unsigned x = 0;
+                (buffer = getc(file_stream)) != '\n' && x < image.width;
+                x++
+            ) {
                 // Maybe invert this behavour and specify in a file not a space symbol, but an empty symbol
                 if (buffer == space_symbol)
                     teco_image_set(&image, layer, ' ', x, y);
                 else if (buffer != ' ')
                     teco_image_set(&image, layer, buffer, x, y);
-                ++x;
             }
         }
     }
@@ -117,9 +117,8 @@ teco_image teco_image_import(char* path, unsigned char layers) {
 };
 
 void teco_image_delete(teco_image* image) {
-    for (char layer = 0; layer < TECO_LAYERS; layer++) {
+    for (char layer = 0; layer < TECO_LAYERS; layer++)
         free(image->data[layer]);
-    }
 };
 
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height) {
@@ -156,14 +155,6 @@ void teco_image_export(teco_image* image, char* path, char space_symbol) {
     }
     
     fclose(file_stream);
-};
-
-char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y) {
-    return image->data[layer - 1][image->width * y + x];
-};
-
-void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y) {
-    image->data[layer - 1][image->width * y + x] = character;
 };
 
 void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layers, long x, long y) {
@@ -209,7 +200,7 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
             for (unsigned dx = image_xl; dx < image_xr; dx++) {
                 char character = teco_image_get(image, layer, dx, dy);
 
-                if (character != '\0') {
+                if (character != '\0')
                     teco_image_set(
                         canvas,
                         layer,
@@ -217,10 +208,17 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
                         dx + canvas_x - image_xl,
                         dy + canvas_y - image_yu
                     );
-                }
             }
         }
     }
+};
+
+char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y) {
+    return image->data[layer - 1][image->width * y + x];
+};
+
+void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y) {
+    image->data[layer - 1][image->width * y + x] = character;
 };
 
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long xl, long yu, long xr, long yd) {
@@ -234,11 +232,9 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
         (layer = shifted & TECO_LAYER_MASK) != 0;
         shifted >>= TECO_LAYER_BITS
     ) {
-        for (unsigned y = yu; y <= yd; y++) {
-            for (unsigned x = xl; x <= xr; x++) {
+        for (unsigned y = yu; y <= yd; y++)
+            for (unsigned x = xl; x <= xr; x++)
                 teco_image_set(image, layer, characters[i], x, y);
-            }
-        }
         
         i++;
     }
@@ -250,11 +246,9 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
         (layer = shifted & TECO_LAYER_MASK) != 0;
         shifted >>= TECO_LAYER_BITS
     ) {
-        for (unsigned y = 0; y < image->height; y++) {
-            for (unsigned x = 0; x < image->width; x++) {
+        for (unsigned y = 0; y < image->height; y++)
+            for (unsigned x = 0; x < image->width; x++)
                 teco_image_set(image, layer, characters[i], x, y);
-            }
-        }
 
         i++;
     }
@@ -270,7 +264,10 @@ void teco_image_print(teco_image* image, unsigned char layers) {
             for (unsigned x = 0; x < image->width; x++) {
                 char character = teco_image_get(image, layer, x, y);
                 
-                (character == '\0') ? printf(" ") : printf("%c", character);
+                if (character == '\0') 
+                    printf(" ");
+                else
+                    printf("%c", character);
             }
             printf("\n");
         }
