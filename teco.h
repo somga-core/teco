@@ -101,6 +101,11 @@ teco_image teco_image_import(char* path, unsigned char layers) {
                 (buffer = getc(file_stream)) != '\n' && x < image.width;
                 x++
             ) {
+                if (buffer == EOF) {
+                    fclose(file_stream);
+                    return image;
+                }
+
                 // Maybe invert this behavour and specify in a file not a space symbol, but an empty symbol
                 if (buffer == space_symbol)
                     teco_image_set(&image, layer, ' ', x, y);
