@@ -251,9 +251,9 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
 
 #if defined(TECO_GUI) || defined(TECO_TUI)
 
+// DECLARATION!!!
 typedef struct teco_window teco_window;
 
-// DECLARATION!!!
 teco_window teco_window_create();
 
 void teco_image_draw(teco_window* window, teco_image* image);
