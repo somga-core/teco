@@ -136,7 +136,7 @@ void teco_image_export(teco_image* image, char* path, char space_symbol) {
     
 	if (!file_stream) return;
 
-    fprintf(file_stream, "%u\n%u\n%c\n", image->width, image->height, space_symbol);
+    fprintf(file_stream, "%u %u %c\n", image->width, image->height, space_symbol);
 
     for (unsigned char layer = 1; layer <= TECO_LAYERS; layer++) {
         for (unsigned y = 0; y < image->height; y++) {
