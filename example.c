@@ -1,4 +1,3 @@
-#define TECO_GUI
 #include "teco.h"
 
 int main() {

@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef TECO_GUI
-
 #define TECO_LAYERS 3
 #define TECO_LAYER_BITS 2
 #define TECO_LAYER_MASK 0b11
@@ -40,9 +38,6 @@ void teco_image_set(teco_image* image, unsigned char layer, char character, unsi
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
-
-void teco_image_print(teco_image* image, unsigned char layers);
-void teco_image_draw(teco_image* image);
 
 // IMPLEMENTATION!!!!!
 teco_image teco_image_create(unsigned width, unsigned height) {
@@ -253,6 +248,29 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
         i++;
     }
 };
+
+#if defined(TECO_GUI) || defined(TECO_TUI)
+
+typedef struct teco_window teco_window;
+
+// DECLARATION!!!
+teco_window teco_window_create();
+
+void teco_image_draw(teco_window* window, teco_image* image);
+
+#if defined(TECO_GUI)
+
+// GUI IMPLEMENTATION!!!
+
+#elif defined(TECO_TUI)
+
+// TUI IMPLEMENTATION!!!
+
+#endif
+
+#else
+
+void teco_image_print(teco_image* image, unsigned char layers);
 
 void teco_image_print(teco_image* image, unsigned char layers) {
     for (
