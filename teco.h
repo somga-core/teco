@@ -312,9 +312,9 @@ typedef struct teco_cache {
 teco_cache teco_cache_create();
 void teco_cache_delete(teco_cache* cache);
 
-void teco_cache_add(teco_cache* cache, char character, SDL_Texture* texture);
+void teco_cache_add(teco_cache* cache, char character_color[2], SDL_Texture* texture);
 
-unsigned teco_cache_get_index(teco_cache* cache, char character);
+unsigned teco_cache_get_index(teco_cache* cache, char character_color[2]);
 void teco_cache_get_character_color(teco_cache* cache, unsigned index, char character_color[2]);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index);
 
