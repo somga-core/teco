@@ -304,7 +304,7 @@ char teco_palette_get_character(teco_palette* palette, unsigned index);
 void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
 
 typedef struct teco_cache {
-    char* charcols;
+    char* charcols; // Pun intended
     SDL_Texture** textures;
     unsigned size;
 } teco_cache;
