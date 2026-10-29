@@ -304,18 +304,18 @@ char teco_palette_get_character(teco_palette* palette, unsigned index);
 void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
 
 typedef struct teco_cache {
-    char* characters_colors;
-    SDL_Texture* textures;
+    char* charcols;
+    SDL_Texture** textures;
     unsigned size;
 } teco_cache;
 
 teco_cache teco_cache_create();
 void teco_cache_delete(teco_cache* cache);
 
-void teco_cache_add(teco_cache* cache, char character_color[2], SDL_Texture* texture);
+void teco_cache_add(teco_cache* cache, char charcol[2], SDL_Texture* texture);
 
-unsigned teco_cache_get_index(teco_cache* cache, char character_color[2]);
-void teco_cache_get_character_color(teco_cache* cache, unsigned index, char character_color[2]);
+unsigned teco_cache_get_index(teco_cache* cache, char charcol[2]);
+void teco_cache_get_charcol(teco_cache* cache, unsigned index, char charcol[2]);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index);
 
 void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Surface* surface, teco_cache* cache, TTF_Font* font);
@@ -395,7 +395,7 @@ void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
 };
 
 unsigned teco_palette_get_index(teco_palette* palette, char character) {
-    int index = 0;
+    unsigned index = 0;
 
     while (index < palette->size && palette->characters[index] != character)
         ++index;
@@ -413,6 +413,55 @@ void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char
     color[0] = palette->colors[colors_index];
     color[1] = palette->colors[colors_index + 1];
     color[2] = palette->colors[colors_index + 2];
+};
+
+teco_cache teco_cache_create() {
+    teco_cache cache = {.size=0, .charcols=NULL, .textures=NULL};
+
+    return cache;
+};
+
+void teco_cache_delete(teco_cache* cache) {
+    free(cache->charcols);
+    free(cache->textures);
+
+    cache->size = 0;
+    cache->charcols = NULL;
+    cache->textures = NULL;
+};
+
+void teco_cache_add(teco_cache* cache, char charcol[2], SDL_Texture* texture) {
+    ++(cache->size);
+
+    cache->charcols = realloc(cache->charcols, cache->size * 2);
+    cache->textures = realloc(cache->textures, cache->size * sizeof(SDL_Texture*));
+
+    cache->textures[cache->size - 1] = texture;
+
+    cache->charcols[(cache->size - 1) * 2] = charcol[0];
+    cache->charcols[(cache->size - 1) * 2 + 1] = charcol[1];
+};
+
+unsigned teco_cache_get_index(teco_cache* cache, char charcol[2]) {
+    unsigned index = 0;
+
+    while (
+        index < cache->size && (
+            cache->charcols[index * 2] != charcol[0] |
+            cache->charcols[index * 2 + 1] != charcol[1]
+        )
+    ) ++index;
+
+    return index;
+};
+
+void teco_cache_get_charcol(teco_cache* cache, unsigned index, char charcol[2]) {
+    charcol[0] = cache->charcols[index * 2];
+    charcol[1] = cache->charcols[index * 2 + 1];
+};
+
+SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index) {
+    return cache->textures[index];
 };
 
 #endif
