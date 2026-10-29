@@ -318,7 +318,7 @@ unsigned teco_cache_get_index(teco_cache* cache, char character_color[2]);
 void teco_cache_get_character_color(teco_cache* cache, unsigned index, char character_color[2]);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index);
 
-void teco_image_draw(teco_image* image, teco_palette palette, SDL_Surface* surface, teco_cache* cache, TTF_Font font);
+void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Surface* surface, teco_cache* cache, TTF_Font* font);
 
 // IMPLEMENTATION!!!
 teco_palette teco_palette_import(char* path) {
