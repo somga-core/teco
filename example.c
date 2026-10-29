@@ -48,5 +48,12 @@ int main(int argc, char *argv[]) {
 
     printf("%d %d-%d-%d", index, color[0], color[1], color[2]);
 
+    teco_image_delete(&image1);
+    teco_image_delete(&image2);
+    teco_image_delete(&background);
+    teco_image_delete(&object);
+    
+    teco_palette_delete(&palette);
+
     return 0;
 }
