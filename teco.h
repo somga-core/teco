@@ -300,9 +300,10 @@ typedef struct teco_sdl_buffer {
 teco_palette teco_palette_import(char* path);
 teco_palette teco_palette_create();
 void teco_palette_delete(teco_palette* palette);
-void teco_palette_add_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
-void teco_palette_add_hex(teco_palette* palette, char character, char* hex);
+void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
+void teco_palette_set_hex(teco_palette* palette, char character, char* hex);
 unsigned teco_palette_get_index(teco_palette* palette, char character);
+char teco_palette_get_character(teco_palette* palette, unsigned index);
 void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
 
 void teco_image_draw(teco_image* image, teco_palette palette, SDL_Surface* sdl_surface, teco_sdl_buffer* sdl_buffer);
@@ -328,7 +329,7 @@ teco_palette teco_palette_import(char* path) {
             fscanf(file_stream, "%u %u %u\n", &red, &green, &blue);
         }
         
-        teco_palette_add_rgb(&palette, buffer, red, green, blue);
+        teco_palette_set_rgb(&palette, buffer, red, green, blue);
     }
     
     fclose(file_stream);
@@ -350,37 +351,49 @@ void teco_palette_delete(teco_palette* palette) {
     palette->colors = NULL;
 };
 
-void teco_palette_add_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue) {
-    ++(palette->size);
+void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue) {
+    unsigned long long colors_index;
 
-    palette->characters = realloc(palette->characters, palette->size);
-    palette->colors = realloc(palette->colors, palette->size * 3);
+    unsigned index = teco_palette_get_index(palette, character);
 
-    palette->characters[palette->size - 1] = character;
+    if (index != palette->size) {
+        colors_index = index * 3;
+    } else {
+        ++(palette->size);
 
-    unsigned long long colors_index = (palette->size - 1) * 3;
+        palette->characters = realloc(palette->characters, palette->size);
+        palette->colors = realloc(palette->colors, palette->size * 3);
+
+        palette->characters[palette->size - 1] = character;
+
+        colors_index = (palette->size - 1) * 3;
+    }
 
     palette->colors[colors_index] = red;
     palette->colors[colors_index + 1] = green;
     palette->colors[colors_index + 2] = blue;
 };
 
-void teco_palette_add_hex(teco_palette* palette, char character, char* hex) {
+void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
     unsigned red, green, blue;
 
     sscanf(hex, "#%2x%2x%2x", &red, &green, &blue);
 
-    teco_palette_add_rgb(palette, character, red, green, blue);
+    teco_palette_set_rgb(palette, character, red, green, blue);
 };
 
 unsigned teco_palette_get_index(teco_palette* palette, char character) {
     int index = 0;
 
-    while (palette->characters[index] != character && index < palette->size)
+    while (index < palette->size && palette->characters[index] != character)
         ++index;
 
     return index;
 };
+
+char teco_palette_get_character(teco_palette* palette, unsigned index) {
+    return palette->characters[index];
+}
 
 void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]) {
     unsigned long long colors_index = index * 3;
