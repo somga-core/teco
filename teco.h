@@ -292,24 +292,28 @@ typedef struct teco_palette {
     unsigned size;
 } teco_palette;
 
+teco_palette teco_palette_import(char* path);
+teco_palette teco_palette_create();
+void teco_palette_delete(teco_palette* palette);
+
+void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
+void teco_palette_set_hex(teco_palette* palette, char character, char* hex);
+
+unsigned teco_palette_get_index(teco_palette* palette, char character);
+char teco_palette_get_character(teco_palette* palette, unsigned index);
+void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
+
 typedef struct teco_cache {
     char* characters_colors;
     SDL_Texture* textures;
     unsigned size;
 } teco_cache;
 
-teco_palette teco_palette_import(char* path);
-teco_palette teco_palette_create();
-void teco_palette_delete(teco_palette* palette);
-void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
-void teco_palette_set_hex(teco_palette* palette, char character, char* hex);
-unsigned teco_palette_get_index(teco_palette* palette, char character);
-char teco_palette_get_character(teco_palette* palette, unsigned index);
-void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
-
 teco_cache teco_cache_create();
 void teco_cache_delete(teco_cache* cache);
+
 void teco_cache_add(teco_cache* cache, char character, SDL_Texture* texture);
+
 unsigned teco_cache_get_index(teco_cache* cache, char character);
 void teco_cache_get_character_color(teco_cache* cache, unsigned index, char character_color[2]);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index);
