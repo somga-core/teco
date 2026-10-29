@@ -263,11 +263,21 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
 typedef struct teco_window teco_window;
 
 teco_window teco_window_create(unsigned width, unsigned height, char* title);
-teco_window teco_window_color_palette_add(char character, unsigned char red, unsigned char green, unsigned char blue);
+
+void teco_window_color_palette_import(teco_window* window, char* path);
+void teco_window_color_palette_add(teco_window* window, char character, unsigned char red, unsigned char green, unsigned char blue);
+void teco_window_color_palette_remove(teco_window* window, char character);
+
+void teco_window_effect_palette_add(teco_window* window, char character, float* (*effect_function) (int, int, int));
+void teco_window_effect_palette_remove(teco_window* window, char character);
+
+void teco_window_delete(teco_window* window);
 
 void teco_image_draw(teco_window* window, teco_image* image);
 
 #if defined(TECO_GUI)
+
+#include <SDL2/SDL.h>
 
 // GUI IMPLEMENTATION!!!
 
