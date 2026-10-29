@@ -297,7 +297,7 @@ teco_palette teco_palette_create();
 void teco_palette_delete(teco_palette* palette);
 
 void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
-void teco_palette_set_hex(teco_palette* palette, char character, char* hex);
+void teco_palette_set_hex(teco_palette* palette, char character, char* hex); // Maybe this function is not needed
 
 unsigned teco_palette_get_index(teco_palette* palette, char character);
 char teco_palette_get_character(teco_palette* palette, unsigned index);
@@ -334,7 +334,7 @@ teco_palette teco_palette_import(char* path) {
     while ((buffer = fgetc(file_stream)) != EOF) {
         fseek(file_stream, 1, SEEK_CUR);
 
-        if (fgetc(file_stream) == '#') {
+        if (fgetc(file_stream) == '#') { // Maybe this option is not needed
             fscanf(file_stream, "%2x%2x%2x\n", &red, &green, &blue);
         } else {
             fseek(file_stream, -1, SEEK_CUR);
