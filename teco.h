@@ -283,6 +283,7 @@ void teco_image_print(teco_image* image, unsigned char layers) {
 #if defined(TECO_SDL2)
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 // DECLARATION!!!
 typedef struct teco_palette {
@@ -291,11 +292,11 @@ typedef struct teco_palette {
     unsigned size;
 } teco_palette;
 
-typedef struct teco_sdl_buffer {
-    char* characters;
-    SDL_Texture* sdl_textures;
+typedef struct teco_cache {
+    char* characters_colors;
+    SDL_Texture* textures;
     unsigned size;
-} teco_sdl_buffer;
+} teco_cache;
 
 teco_palette teco_palette_import(char* path);
 teco_palette teco_palette_create();
@@ -306,7 +307,14 @@ unsigned teco_palette_get_index(teco_palette* palette, char character);
 char teco_palette_get_character(teco_palette* palette, unsigned index);
 void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
 
-void teco_image_draw(teco_image* image, teco_palette palette, SDL_Surface* sdl_surface, teco_sdl_buffer* sdl_buffer);
+teco_cache teco_cache_create();
+void teco_cache_delete(teco_cache* cache);
+void teco_cache_add(teco_cache* cache, char character, SDL_Texture* texture);
+unsigned teco_cache_get_index(teco_cache* cache, char character);
+void teco_cache_get_character_color(teco_cache* cache, unsigned index, char character_color[2]);
+SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index);
+
+void teco_image_draw(teco_image* image, teco_palette palette, SDL_Surface* surface, teco_cache* cache, TTF_Font font);
 
 // IMPLEMENTATION!!!
 teco_palette teco_palette_import(char* path) {
