@@ -42,6 +42,8 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
 
+void teco_image_print(teco_image* image, unsigned char layers);
+
 // IMPLEMENTATION!!!!!
 teco_image teco_image_create(unsigned width, unsigned height) {
     teco_image image = {.width=width, .height=height};
@@ -257,6 +259,27 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
     }
 };
 
+void teco_image_print(teco_image* image, unsigned char layers) {
+    for (
+        unsigned char layer, shifted = layers;
+        (layer = shifted & TECO_LAYER_MASK) != 0;
+        shifted >>= TECO_LAYER_BITS
+    ) {
+        for (unsigned y = 0; y < image->height; y++) {
+            for (unsigned x = 0; x < image->width; x++) {
+                char character = teco_image_get(image, layer, x, y);
+                
+                if (character == '\0') 
+                    printf(" ");
+                else
+                    printf("%c", character);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+};
+
 #if defined(TECO_SDL2)
 
 #include <SDL2/SDL.h>
@@ -365,33 +388,6 @@ void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char
     color[0] = palette->colors[colors_index];
     color[1] = palette->colors[colors_index + 1];
     color[2] = palette->colors[colors_index + 2];
-};
-
-#else
-
-// DECLARATION!!!
-void teco_image_print(teco_image* image, unsigned char layers);
-
-// IMPLEMENTATION!!!
-void teco_image_print(teco_image* image, unsigned char layers) {
-    for (
-        unsigned char layer, shifted = layers;
-        (layer = shifted & TECO_LAYER_MASK) != 0;
-        shifted >>= TECO_LAYER_BITS
-    ) {
-        for (unsigned y = 0; y < image->height; y++) {
-            for (unsigned x = 0; x < image->width; x++) {
-                char character = teco_image_get(image, layer, x, y);
-                
-                if (character == '\0') 
-                    printf(" ");
-                else
-                    printf("%c", character);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
 };
 
 #endif
