@@ -422,6 +422,10 @@ teco_cache teco_cache_create() {
 };
 
 void teco_cache_delete(teco_cache* cache) {
+    for (unsigned index; index < cache->size; index++) {
+        SDL_DestroyTexture(cache->textures[index]);
+    }
+
     free(cache->charcols);
     free(cache->textures);
 
