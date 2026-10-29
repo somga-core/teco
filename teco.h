@@ -257,35 +257,115 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters) 
     }
 };
 
-#if defined(TECO_GUI) || defined(TECO_TUI)
-
-// DECLARATION!!!
-typedef struct teco_window teco_window;
-
-teco_window teco_window_create(unsigned width, unsigned height, char* title);
-
-void teco_window_color_palette_import(teco_window* window, char* path);
-void teco_window_color_palette_add(teco_window* window, char character, unsigned char red, unsigned char green, unsigned char blue);
-void teco_window_color_palette_remove(teco_window* window, char character);
-
-void teco_window_effect_palette_add(teco_window* window, char character, float* (*effect_function) (int, int, int));
-void teco_window_effect_palette_remove(teco_window* window, char character);
-
-void teco_window_delete(teco_window* window);
-
-void teco_image_draw(teco_window* window, teco_image* image);
-
-#if defined(TECO_GUI)
+#if defined(TECO_SDL2)
 
 #include <SDL2/SDL.h>
 
-// GUI IMPLEMENTATION!!!
+// DECLARATION!!!
+typedef struct teco_palette {
+    char* characters;
+    unsigned char* colors;
+    unsigned size;
+} teco_palette;
 
-#elif defined(TECO_TUI)
+typedef struct teco_sdl_buffer {
+    char* characters;
+    SDL_Texture* sdl_textures;
+    unsigned size;
+} teco_sdl_buffer;
 
-// TUI IMPLEMENTATION!!!
+teco_palette teco_palette_import(char* path);
+teco_palette teco_palette_create();
+void teco_palette_delete(teco_palette* palette);
+void teco_palette_add_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
+void teco_palette_add_hex(teco_palette* palette, char character, char* hex);
+unsigned teco_palette_get_index(teco_palette* palette, char character);
+void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
 
-#endif
+void teco_image_draw(teco_image* image, teco_palette palette, SDL_Surface* sdl_surface, teco_sdl_buffer* sdl_buffer);
+
+// IMPLEMENTATION!!!
+teco_palette teco_palette_import(char* path) {
+    teco_palette palette = teco_palette_create();
+
+    FILE* file_stream = fopen(path, "r");
+
+    if (!file_stream) return palette;
+
+    char buffer;
+    unsigned red, green, blue;
+
+    while ((buffer = fgetc(file_stream)) != EOF) {
+        fseek(file_stream, 1, SEEK_CUR);
+
+        if (fgetc(file_stream) == '#') {
+            fscanf(file_stream, "%2x%2x%2x\n", &red, &green, &blue);
+        } else {
+            fseek(file_stream, -1, SEEK_CUR);
+            fscanf(file_stream, "%u %u %u\n", &red, &green, &blue);
+        }
+        
+        teco_palette_add_rgb(&palette, buffer, red, green, blue);
+    }
+    
+    fclose(file_stream);
+
+    return palette;
+};
+
+teco_palette teco_palette_create() {
+    teco_palette palette = {.size=0, .characters=NULL, .colors=NULL};
+    return palette;
+};
+
+void teco_palette_delete(teco_palette* palette) {
+    free(palette->characters);
+    free(palette->colors);
+
+    palette->size = 0;
+    palette->characters = NULL;
+    palette->colors = NULL;
+};
+
+void teco_palette_add_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue) {
+    ++(palette->size);
+
+    palette->characters = realloc(palette->characters, palette->size);
+    palette->colors = realloc(palette->colors, palette->size * 3);
+
+    palette->characters[palette->size - 1] = character;
+
+    unsigned long long colors_index = (palette->size - 1) * 3;
+
+    palette->colors[colors_index] = red;
+    palette->colors[colors_index + 1] = green;
+    palette->colors[colors_index + 2] = blue;
+};
+
+void teco_palette_add_hex(teco_palette* palette, char character, char* hex) {
+    unsigned red, green, blue;
+
+    sscanf(hex, "#%2x%2x%2x", &red, &green, &blue);
+
+    teco_palette_add_rgb(palette, character, red, green, blue);
+};
+
+unsigned teco_palette_get_index(teco_palette* palette, char character) {
+    int index = 0;
+
+    while (palette->characters[index] != character && index < palette->size)
+        ++index;
+
+    return index;
+};
+
+void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]) {
+    unsigned long long colors_index = index * 3;
+
+    color[0] = palette->colors[colors_index];
+    color[1] = palette->colors[colors_index + 1];
+    color[2] = palette->colors[colors_index + 2];
+};
 
 #else
 

@@ -3,12 +3,10 @@ TECO
 WHAT IS THIS?
 
 TeCo (Terminal core) is a onefile C tool that helps with creating
-ASCII-styled GUI and TUI games
+ASCII-styled games with different graphics libraries
 
-CREDITS
+SUPPORTED LIBRARIES
 
-Here are libs that were used:
+Here are libs that are supproted:
 
  - SDL2: https://www.libsdl.org
-
- - ncurses: https://invisible-island.net/ncurses

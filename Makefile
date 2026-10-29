@@ -2,18 +2,14 @@ CC=gcc
 INPUT=./example.c
 OUTPUT=./exc
 
-GUI_FLAGS=-lSDL2
-TUI_FLAGS=-lncurses
+SDL2_FLAGS=-lSDL2
 
 RMCOMMAND=rm -f
 
-.PHONY: gui tui run clean
+.PHONY: sdl2 run clean
 
-gui: clean
-	$(CC) -o $(OUTPUT) $(INPUT) $(GUI_FLAGS)
-	
-tui: clean
-	$(CC) -o $(OUTPUT) $(INPUT) $(TUI_FLAGS)
+sdl2: clean
+	$(CC) -o $(OUTPUT) $(INPUT) $(SDL2_FLAGS)
 
 run:
 	$(OUTPUT)
