@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
     TTF_Font* font = TTF_OpenFont("examples/assets/font.ttf", 30);
 
-    bool run = true;
+    char run = 1;
 
     SDL_Event event;
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     while (run) {
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
-                run = false;
+                run = 0;
             }
         }
 
