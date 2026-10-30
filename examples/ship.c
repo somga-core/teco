@@ -17,7 +17,7 @@ void effect_ship(float* dx, float* dy, float* scale_x, float* scale_y, unsigned 
 
 void effect_blink(float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
     *scale_x = sin(y * 5. + x * 10. + (va_arg(args, int) / 500.));
-    *scale_y = pow(*scale_x, 3);
+    *scale_y = *scale_x * *scale_x * *scale_x;
 }
 
 int main(int argc, char *argv[]) {
