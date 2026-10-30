@@ -1,4 +1,4 @@
-TECO
+TeCo
 
 WHAT IS THIS?
 
@@ -10,3 +10,7 @@ SUPPORTED LIBRARIES
 Here are libs that are supproted:
 
  - SDL2: https://www.libsdl.org
+
+CREDITS
+
+Font used in examples is JetBrains Mono: https://jetbrains.com/mono

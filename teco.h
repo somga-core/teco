@@ -90,7 +90,10 @@ teco_image teco_image_import(char* path, unsigned char layers) {
 
     if (!file_stream) return teco_image_create(0, 0);
 
-    fscanf(file_stream, "%u %u %c\n", &width, &height, &space_symbol);
+    fscanf(file_stream, "%u %u %c", &width, &height, &space_symbol);
+
+    while (getc(file_stream) != '\n') {};
+
     teco_image image = teco_image_create(width, height);
 
     for (
@@ -304,12 +307,13 @@ void teco_palette_set_hex(teco_palette* palette, char character, char* hex); // 
 
 unsigned short teco_palette_get_index(teco_palette* palette, char character);
 char teco_palette_get_character(teco_palette* palette, unsigned short index);
-void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char color[3]);
+void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue);
 
 typedef struct teco_cache {
     char* symbols; // Previously this was named charcol (Short for character & color) (Pun intended)
     SDL_Texture** textures;
     unsigned short size;
+    // Maybe replace "symbols" with "keys" variable: 256 elements long array of chars, that stores indices of textures
 } teco_cache;
 
 teco_cache teco_cache_create();
@@ -321,7 +325,8 @@ unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
 char teco_cache_get_symbol(teco_cache* cache, unsigned short index);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
 
-void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Surface* surface, teco_cache* cache, TTF_Font* font);
+// Maybe add another parameter that defines how to render symbols: smoothly or solidly
+void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font);
 
 // IMPLEMENTATION!!!
 teco_palette teco_palette_import(char* path) {
@@ -338,10 +343,10 @@ teco_palette teco_palette_import(char* path) {
         fseek(file_stream, 1, SEEK_CUR);
 
         if (fgetc(file_stream) == '#') { // Maybe this option is not needed
-            fscanf(file_stream, "%2x%2x%2x\n", &red, &green, &blue);
+            fscanf(file_stream, "%2hx%2hx%2hx\n", &red, &green, &blue);
         } else {
             fseek(file_stream, -1, SEEK_CUR);
-            fscanf(file_stream, "%u %u %u\n", &red, &green, &blue);
+            fscanf(file_stream, "%hu %hu %hu\n", &red, &green, &blue);
         }
         
         teco_palette_set_rgb(&palette, buffer, red, green, blue);
@@ -367,12 +372,12 @@ void teco_palette_delete(teco_palette* palette) {
 };
 
 void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue) {
-    unsigned short colors_index;
+    unsigned short color_index;
 
     unsigned short index = teco_palette_get_index(palette, character);
 
     if (index != palette->size) {
-        colors_index = index * 3;
+        color_index = index * 3;
     } else {
         ++(palette->size);
 
@@ -381,18 +386,18 @@ void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char r
 
         palette->characters[palette->size - 1] = character;
 
-        colors_index = (palette->size - 1) * 3;
+        color_index = (palette->size - 1) * 3;
     }
 
-    palette->colors[colors_index] = red;
-    palette->colors[colors_index + 1] = green;
-    palette->colors[colors_index + 2] = blue;
+    palette->colors[color_index] = red;
+    palette->colors[color_index + 1] = green;
+    palette->colors[color_index + 2] = blue;
 };
 
 void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
     unsigned short red, green, blue;
 
-    sscanf(hex, "#%2x%2x%2x", &red, &green, &blue);
+    sscanf(hex, "#%2hx%2hx%2hx", &red, &green, &blue);
 
     teco_palette_set_rgb(palette, character, red, green, blue);
 };
@@ -410,12 +415,12 @@ char teco_palette_get_character(teco_palette* palette, unsigned short index) {
     return palette->characters[index];
 }
 
-void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char color[3]) {
-    unsigned short colors_index = index * 3;
+void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue) {
+    unsigned short color_index = index * 3;
 
-    color[0] = palette->colors[colors_index];
-    color[1] = palette->colors[colors_index + 1];
-    color[2] = palette->colors[colors_index + 2];
+    *red = palette->colors[color_index];
+    *green = palette->colors[color_index + 1];
+    *blue = palette->colors[color_index + 2];
 };
 
 teco_cache teco_cache_create() {
@@ -462,6 +467,62 @@ char teco_cache_get_symbol(teco_cache* cache, unsigned short index) {
 
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index) {
     return cache->textures[index];
+};
+
+void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font) {
+    unsigned render_width, render_height;
+    SDL_GetRendererOutputSize(renderer, &render_width, &render_height);
+
+    unsigned symbol_width = render_width / image->width;
+    unsigned symbol_height = render_height / image->height;
+
+    char color, symbol, effect;
+    unsigned short color_index, texture_index;
+
+    unsigned char red = 255, green = 255, blue = 255;
+
+    SDL_Texture* texture;
+    SDL_Surface* surface;
+    SDL_Rect rectangle = {0, 0, symbol_width, symbol_height};
+    SDL_Color foreground = {255, 255, 255};
+
+    char render_text[2] = " ";
+
+    for (unsigned y = 0; y < image->height; y++) {
+        for (unsigned x = 0; x < image->width; x++) {
+            symbol = teco_image_get(image, TECO_S, x, y);
+            if (symbol == '\0' || symbol == ' ') continue;
+
+            color = teco_image_get(image, TECO_C, x, y);
+            color_index = teco_palette_get_index(palette, color);
+            if (color_index != palette->size)
+                teco_palette_get_color(
+                    palette, color_index,
+                    &red, &green, &blue
+                );
+
+            texture_index = teco_cache_get_index(cache, symbol);
+            if (texture_index == cache->size) {
+                render_text[0] = symbol;
+                
+                surface = TTF_RenderText_Solid(font, render_text, foreground);
+                texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+                teco_cache_add(cache, symbol, texture);
+
+                SDL_FreeSurface(surface);
+            } else {
+                texture = teco_cache_get_texture(cache, texture_index);
+            }
+
+            rectangle.x = symbol_width * x;
+            rectangle.y = symbol_height * y;
+
+            SDL_SetTextureColorMod(texture, red, green, blue);
+
+            SDL_RenderCopy(renderer, texture, NULL, &rectangle);
+        }
+    }
 };
 
 #endif

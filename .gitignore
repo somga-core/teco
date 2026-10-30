@@ -2,6 +2,6 @@
 exc
 exc.exe
 *.swp
-super_export.tci
+temp*
 SDL2.dll
 SDL2_ttf.dll
