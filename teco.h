@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #define TECO_LAYERS 3
 #define TECO_LAYER_BITS 2
@@ -325,8 +326,25 @@ unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
 char teco_cache_get_symbol(teco_cache* cache, unsigned short index);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
 
+typedef void (*teco_effect) (float*, float*, float*, float*, unsigned, unsigned, va_list args);
+
+typedef struct teco_bulb {
+    char* characters;
+    teco_effect* effects;
+    unsigned short size;
+} teco_bulb;
+
+teco_bulb teco_bulb_create();
+void teco_bulb_delete(teco_bulb* bulb);
+
+void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect);
+
+unsigned short teco_bulb_get_index(teco_bulb* bulb, char character);
+char teco_bulb_get_character(teco_bulb* bulb, unsigned short index);
+teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
+
 // Maybe add another parameter that defines how to render symbols: smoothly or solidly
-void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font);
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...);
 
 // IMPLEMENTATION!!!
 teco_palette teco_palette_import(char* path) {
@@ -469,17 +487,70 @@ SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index) {
     return cache->textures[index];
 };
 
-void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font) {
+teco_bulb teco_bulb_create() {
+    teco_bulb bulb = {.size=0, .characters=NULL, .effects=NULL};
+
+    return bulb;
+};
+
+void teco_bulb_delete(teco_bulb* bulb) {
+    free(bulb->characters);
+    free(bulb->effects);
+
+    bulb->size = 0;
+    bulb->characters = NULL;
+    bulb->effects = NULL;
+};
+
+void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect) {
+    unsigned short index = teco_bulb_get_index(bulb, character);
+
+    if (index == bulb->size) {
+        ++(bulb->size);
+
+        bulb->characters = realloc(bulb->characters, bulb->size);
+        bulb->effects = realloc(bulb->effects, bulb->size * sizeof(teco_effect));
+
+        bulb->characters[bulb->size - 1] = character;
+    }
+
+    bulb->effects[index] = effect;
+};
+
+unsigned short teco_bulb_get_index(teco_bulb* bulb, char character) {
+    unsigned short index = 0;
+
+    while (index < bulb->size && bulb->characters[index] != character)
+        ++index;
+
+    return index;
+};
+
+char teco_bulb_get_character(teco_bulb* bulb, unsigned short index) {
+    return bulb->characters[index];
+};
+
+teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index) {
+    return bulb->effects[index];
+};
+
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...) {
     unsigned render_width, render_height;
     SDL_GetRendererOutputSize(renderer, &render_width, &render_height);
 
     unsigned symbol_width = render_width / image->width;
     unsigned symbol_height = render_height / image->height;
 
-    char color, symbol, effect;
-    unsigned short color_index, texture_index;
+    char color_char, symbol, effect_char;
+    unsigned short color_index, texture_index, effect_index;
 
     unsigned char red = 255, green = 255, blue = 255;
+
+    teco_effect effect;
+    float dx = 0, dy = 0, scale_x = 1, scale_y = 1;
+
+    va_list effect_args, effect_args_temp;
+    va_start(effect_args, font);
 
     SDL_Texture* texture;
     SDL_Surface* surface;
@@ -493,13 +564,15 @@ void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Renderer* ren
             symbol = teco_image_get(image, TECO_S, x, y);
             if (symbol == '\0' || symbol == ' ') continue;
 
-            color = teco_image_get(image, TECO_C, x, y);
-            color_index = teco_palette_get_index(palette, color);
-            if (color_index != palette->size)
-                teco_palette_get_color(
-                    palette, color_index,
-                    &red, &green, &blue
-                );
+            color_char = teco_image_get(image, TECO_C, x, y);
+            if (color_char != '\0') {
+                color_index = teco_palette_get_index(palette, color_char);
+                if (color_index != palette->size)
+                    teco_palette_get_color(
+                        palette, color_index,
+                        &red, &green, &blue
+                    );
+            }
 
             texture_index = teco_cache_get_index(cache, symbol);
             if (texture_index == cache->size) {
@@ -517,12 +590,35 @@ void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Renderer* ren
 
             rectangle.x = symbol_width * x;
             rectangle.y = symbol_height * y;
+            rectangle.w = symbol_width;
+            rectangle.h = symbol_height;
+
+            effect_char = teco_image_get(image, TECO_E, x, y);
+
+            if (effect_char != '\0') {
+                effect_index = teco_bulb_get_index(bulb, effect_char);
+
+                if (effect_index != bulb->size) {
+                    effect = teco_bulb_get_effect(bulb, effect_index);
+
+                    dx = 0; dy = 0; scale_x = 1; scale_y = 1;
+                    va_copy(effect_args_temp, effect_args);
+                    effect(&dx, &dy, &scale_x, &scale_y, x, y, effect_args_temp);
+
+                    rectangle.x += symbol_width * (dx - (1 - scale_x) * .5);
+                    rectangle.y += symbol_height * (dy - (1 - scale_y) * .5);
+                    rectangle.w *= scale_x;
+                    rectangle.h *= scale_y;
+                }
+            }
 
             SDL_SetTextureColorMod(texture, red, green, blue);
 
             SDL_RenderCopy(renderer, texture, NULL, &rectangle);
         }
     }
+
+    va_end(effect_args);
 };
 
 #endif

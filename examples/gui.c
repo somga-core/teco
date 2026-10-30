@@ -1,7 +1,12 @@
 #define TECO_SDL2
 #include "../teco.h"
+#include <math.h>
 
 #define FPS 60
+
+void effect_wave (float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
+    *dy = sin(x / 2.f + (va_arg(args, int) / 500.f)) / 4;
+}
 
 int main(int argc, char *argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -30,6 +35,9 @@ int main(int argc, char *argv[]) {
     teco_palette palette = teco_palette_import("examples/assets/core.tcp");
     teco_cache cache = teco_cache_create();
 
+    teco_bulb bulb = teco_bulb_create();
+    teco_bulb_set(&bulb, '#', &effect_wave);
+
     while (run) {
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
@@ -39,7 +47,7 @@ int main(int argc, char *argv[]) {
 
         SDL_RenderClear(renderer);
 
-        teco_image_draw(&image, &palette, renderer, &cache, font);
+        teco_image_draw(&image, &palette, &bulb, renderer, &cache, font, SDL_GetTicks());
 
         SDL_RenderPresent(renderer);
 
