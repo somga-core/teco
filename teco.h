@@ -343,6 +343,7 @@ unsigned short teco_bulb_get_index(teco_bulb* bulb, char character);
 char teco_bulb_get_character(teco_bulb* bulb, unsigned short index);
 teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
 // Maybe condence theese similar functions somehow
+// Maybe add function to delete only one element from palette or bulb
 
 // Maybe add another parameter that defines how to render symbols: smoothly or solidly
 void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...);
