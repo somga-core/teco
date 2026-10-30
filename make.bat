@@ -1,2 +1,1 @@
-gcc example.c -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -o exc.exe
-.\exc.exe
+gcc example.c -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -o exc.exe && .\exc.exe
