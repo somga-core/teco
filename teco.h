@@ -292,6 +292,12 @@ void teco_image_print(teco_image* image, unsigned char layers) {
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#ifdef TECO_RENDER_TEXT_SOLID
+#define TECO_RENDER_TEXT TTF_RenderText_Solid
+#else
+#define TECO_RENDER_TEXT TTF_RenderText_Blended
+#endif
+
 // DECLARATION!!!
 typedef struct teco_palette {
     char* characters;
@@ -345,7 +351,6 @@ teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
 // Maybe condence theese similar functions somehow
 // Maybe add function to delete only one element from palette or bulb
 
-// Maybe add another parameter that defines how to render symbols: smoothly or solidly
 void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...);
 
 // IMPLEMENTATION!!!
@@ -580,8 +585,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
             if (texture_index == cache->size) {
                 render_text[0] = symbol;
                 
-                surface = TTF_RenderText_Solid(font, render_text, foreground);
-                // Or TTF_RenderText_Blended
+                surface = TECO_RENDER_TEXT(font, render_text, foreground);
                 texture = SDL_CreateTextureFromSurface(renderer, surface);
 
                 teco_cache_add(cache, symbol, texture);

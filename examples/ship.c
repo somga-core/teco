@@ -1,4 +1,5 @@
 #define TECO_SDL2
+// #define TECO_RENDER_TEXT_SOLID
 #include "../teco.h"
 #include <math.h>
 
@@ -36,7 +37,7 @@ int main(int argc, char *argv[]) {
     );
     SDL_SetRenderDrawColor(renderer, 0x12, 0x12, 0x12, 0x00);
 
-    TTF_Font* font = TTF_OpenFont("examples/assets/font.ttf", 20);
+    TTF_Font* font = TTF_OpenFont("examples/assets/font.ttf", 30);
 
     bool run = true;
 
