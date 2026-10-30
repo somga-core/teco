@@ -332,7 +332,7 @@ typedef struct teco_bulb {
     char* characters;
     teco_effect* effects;
     unsigned short size;
-} teco_bulb;
+} teco_bulb; // Maybe call this shaderpack. Sane name is needed
 
 teco_bulb teco_bulb_create();
 void teco_bulb_delete(teco_bulb* bulb);
