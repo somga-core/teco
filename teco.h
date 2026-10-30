@@ -124,6 +124,9 @@ teco_image_import_end:
 void teco_image_delete(teco_image* image) {
     for (char layer = 0; layer < TECO_LAYERS; layer++)
         free(image->data[layer]);
+
+    image->width = 0;
+    image->height = 0;
 };
 
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height) {
@@ -289,7 +292,7 @@ void teco_image_print(teco_image* image, unsigned char layers) {
 typedef struct teco_palette {
     char* characters;
     unsigned char* colors;
-    unsigned size;
+    unsigned short size;
 } teco_palette;
 
 teco_palette teco_palette_import(char* path);
@@ -299,14 +302,14 @@ void teco_palette_delete(teco_palette* palette);
 void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
 void teco_palette_set_hex(teco_palette* palette, char character, char* hex); // Maybe this function is not needed
 
-unsigned teco_palette_get_index(teco_palette* palette, char character);
-char teco_palette_get_character(teco_palette* palette, unsigned index);
-void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]);
+unsigned short teco_palette_get_index(teco_palette* palette, char character);
+char teco_palette_get_character(teco_palette* palette, unsigned short index);
+void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char color[3]);
 
 typedef struct teco_cache {
     char* symbols; // Previously this was named charcol (Short for character & color) (Pun intended)
     SDL_Texture** textures;
-    unsigned size;
+    unsigned short size;
 } teco_cache;
 
 teco_cache teco_cache_create();
@@ -314,9 +317,9 @@ void teco_cache_delete(teco_cache* cache);
 
 void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture);
 
-unsigned teco_cache_get_index(teco_cache* cache, char symbol);
-char teco_cache_get_symbol(teco_cache* cache, unsigned index);
-SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index);
+unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
+char teco_cache_get_symbol(teco_cache* cache, unsigned short index);
+SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
 
 void teco_image_draw(teco_image* image, teco_palette* palette, SDL_Surface* surface, teco_cache* cache, TTF_Font* font);
 
@@ -329,7 +332,7 @@ teco_palette teco_palette_import(char* path) {
     if (!file_stream) return palette;
 
     char buffer;
-    unsigned red, green, blue;
+    unsigned short red = 0, green = 0, blue = 0;
 
     while ((buffer = fgetc(file_stream)) != EOF) {
         fseek(file_stream, 1, SEEK_CUR);
@@ -364,9 +367,9 @@ void teco_palette_delete(teco_palette* palette) {
 };
 
 void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue) {
-    unsigned long long colors_index;
+    unsigned short colors_index;
 
-    unsigned index = teco_palette_get_index(palette, character);
+    unsigned short index = teco_palette_get_index(palette, character);
 
     if (index != palette->size) {
         colors_index = index * 3;
@@ -387,15 +390,15 @@ void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char r
 };
 
 void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
-    unsigned red, green, blue;
+    unsigned short red, green, blue;
 
     sscanf(hex, "#%2x%2x%2x", &red, &green, &blue);
 
     teco_palette_set_rgb(palette, character, red, green, blue);
 };
 
-unsigned teco_palette_get_index(teco_palette* palette, char character) {
-    unsigned index = 0;
+unsigned short teco_palette_get_index(teco_palette* palette, char character) {
+    unsigned short index = 0;
 
     while (index < palette->size && palette->characters[index] != character)
         ++index;
@@ -403,12 +406,12 @@ unsigned teco_palette_get_index(teco_palette* palette, char character) {
     return index;
 };
 
-char teco_palette_get_character(teco_palette* palette, unsigned index) {
+char teco_palette_get_character(teco_palette* palette, unsigned short index) {
     return palette->characters[index];
 }
 
-void teco_palette_get_color(teco_palette* palette, unsigned index, unsigned char color[3]) {
-    unsigned long long colors_index = index * 3;
+void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char color[3]) {
+    unsigned short colors_index = index * 3;
 
     color[0] = palette->colors[colors_index];
     color[1] = palette->colors[colors_index + 1];
@@ -422,7 +425,7 @@ teco_cache teco_cache_create() {
 };
 
 void teco_cache_delete(teco_cache* cache) {
-    for (unsigned index; index < cache->size; index++) {
+    for (unsigned short index = 0; index < cache->size; index++) {
         SDL_DestroyTexture(cache->textures[index]);
     }
 
@@ -444,8 +447,8 @@ void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture) {
     cache->symbols[cache->size - 1] = symbol;
 };
 
-unsigned teco_cache_get_index(teco_cache* cache, char symbol) {
-    unsigned index = 0;
+unsigned short teco_cache_get_index(teco_cache* cache, char symbol) {
+    unsigned short index = 0;
 
     while (index < cache->size && cache->symbols[index] != symbol)
         ++index;
@@ -453,11 +456,11 @@ unsigned teco_cache_get_index(teco_cache* cache, char symbol) {
     return index;
 };
 
-char teco_cache_get_symbol(teco_cache* cache, unsigned index) {
+char teco_cache_get_symbol(teco_cache* cache, unsigned short index) {
     return cache->symbols[index];
 };
 
-SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned index) {
+SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index) {
     return cache->textures[index];
 };
 
