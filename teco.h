@@ -580,6 +580,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
                 render_text[0] = symbol;
                 
                 surface = TTF_RenderText_Solid(font, render_text, foreground);
+                // Or TTF_RenderText_Blended
                 texture = SDL_CreateTextureFromSurface(renderer, surface);
 
                 teco_cache_add(cache, symbol, texture);
