@@ -1,7 +1,6 @@
 .vscode
-exc
-exc.exe
+exc*
+*.exe
 *.swp
 temp*
-SDL2.dll
-SDL2_ttf.dll
+*.dll
