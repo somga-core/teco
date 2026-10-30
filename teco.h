@@ -605,8 +605,8 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
                     va_copy(effect_args_temp, effect_args);
                     effect(&dx, &dy, &scale_x, &scale_y, x, y, effect_args_temp);
 
-                    rectangle.x += symbol_width * (dx - (1 - scale_x) * .5);
-                    rectangle.y += symbol_height * (dy - (1 - scale_y) * .5);
+                    rectangle.x += symbol_width * (dx + (1 - scale_x) * .5);
+                    rectangle.y += symbol_height * (dy + (1 - scale_y) * .5);
                     rectangle.w *= scale_x;
                     rectangle.h *= scale_y;
                 }

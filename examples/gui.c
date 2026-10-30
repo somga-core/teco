@@ -4,8 +4,19 @@
 
 #define FPS 60
 
-void effect_wave (float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
-    *dy = sin(x / 2.f + (va_arg(args, int) / 500.f)) / 4;
+void effect_wave(float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
+    *dy = sin(x / 2. + (va_arg(args, int) / 500.)) / 4 - .15;
+}
+
+void effect_ship(float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
+    unsigned time = va_arg(args, unsigned);
+
+    *dy = (-sin(time / 500. + 2) * (((int) x) - 7) / 20.) - .2 * sin(time / 500.);
+}
+
+void effect_blink(float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
+    *scale_x = sin(y * 5. + x * 10. + (va_arg(args, int) / 500.));
+    *scale_y = pow(*scale_x, 3);
 }
 
 int main(int argc, char *argv[]) {
@@ -37,6 +48,8 @@ int main(int argc, char *argv[]) {
 
     teco_bulb bulb = teco_bulb_create();
     teco_bulb_set(&bulb, '#', &effect_wave);
+    teco_bulb_set(&bulb, '/', &effect_ship);
+    teco_bulb_set(&bulb, '+', &effect_blink);
 
     while (run) {
         while (SDL_PollEvent(&event) != 0) {
