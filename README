@@ -11,6 +11,8 @@ Here are libs that are supproted:
 
  - SDL2: https://www.libsdl.org
 
+ - Ncurses: https://invisible-island.net/ncurses
+
 CREDITS
 
 Font used in examples is JetBrains Mono: https://jetbrains.com/mono

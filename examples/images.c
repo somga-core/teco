@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
     for (char i = 0; i < 11; i++) {
         teco_image_set(&image2, TECO_S, i + 97, i, i);
     }
-    teco_image_resize(&image2, 10, 10);
+    teco_image_resize(&image2, 3, 10, 10);
 
     printf("image1 v1:\n");
     teco_image_print(&image1, TECO_SCE);

@@ -33,8 +33,7 @@ teco_image teco_image_copy(teco_image* image, unsigned char layers);
 teco_image teco_image_import(char* path, unsigned char layer_count);
 
 void teco_image_delete(teco_image* image);
-void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
-void teco_image_relayer_count(teco_image* image, unsigned char new_layer_count);
+void teco_image_resize(teco_image* image, unsigned char new_layer_count, unsigned new_width, unsigned new_height);
 
 void teco_image_export(teco_image* image, char* path, char space_symbol);
 
@@ -130,10 +129,13 @@ void teco_image_delete(teco_image* image) {
     image->height = 0;
 };
 
-void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height) {
-    teco_image new_image = teco_image_create(image->layer_count, new_width, new_height);
+void teco_image_resize(teco_image* image, unsigned char new_layer_count, unsigned new_width, unsigned new_height) {
+    teco_image new_image = teco_image_create(new_layer_count, new_width, new_height);
 
-    teco_image_apply(&new_image, image, TECO_SCE, 0, 0);
+    unsigned char copy_layer_count = new_layer_count;
+    if (copy_layer_count > image->layer_count) copy_layer_count = image->layer_count;
+
+    teco_image_apply(&new_image, image, TECO_SCE & (unsigned) (pow(TECO_LAYER_MASK + 1, copy_layer_count) - 1), 0, 0);
 
     teco_image_delete(image);
 
@@ -605,6 +607,85 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
     }
 
     va_end(effect_args);
+};
+
+#elif defined(TECO_NCURSES)
+
+#include <ncurses.h>
+
+void teco_image_draw(teco_image* image, unsigned dx, unsigned dy);
+void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, unsigned dy);
+
+void teco_palette_import(char* path, short start);
+
+void teco_image_draw(teco_image* image, unsigned dx, unsigned dy) {
+    for (unsigned y = 0; y < image->height; y++) {
+        for (unsigned x = 0; x < image->width; x++) {
+            char symbol = teco_image_get(image, TECO_S, x, y);
+
+            if (symbol == ' ' || symbol == '\0') continue;
+
+            if (image->layer_count >= 2) {
+                int color_pair = COLOR_PAIR(teco_image_get(image, TECO_C, x, y));
+                attron(color_pair);
+            
+                mvaddch(dy + y, dx + x, symbol);
+
+                attroff(color_pair);
+            } else {
+                mvaddch(dy + y, dx + x, symbol);
+            }
+        }
+    }
+};
+
+void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, unsigned dy) {
+    for (unsigned y = 0; y < image->height; y++) {
+        for (unsigned x = 0; x < image->width; x++) {
+            char symbol = teco_image_get(image, TECO_S, x, y);
+
+            if (symbol == ' ' || symbol == '\0') continue;
+
+            if (image->layer_count >= 2) {
+                int color_pair = COLOR_PAIR(teco_image_get(image, TECO_C, x, y));
+                wattron(window, color_pair);
+            
+                mvwaddch(window, dy + y, dx + x, symbol);
+
+                wattroff(window, color_pair);
+            } else {
+                mvwaddch(window, dy + y, dx + x, symbol);
+            }
+        }
+    }
+};
+
+void teco_palette_import(char* path, short start) {
+    FILE* file_stream = fopen(path, "r");
+
+    if (!file_stream) return;
+
+    char buffer;
+    unsigned i = 0;
+    unsigned short red = 0, green = 0, blue = 0;
+
+    while ((buffer = fgetc(file_stream)) != EOF) {
+        fseek(file_stream, 1, SEEK_CUR);
+
+        if (fgetc(file_stream) == '#') { // Maybe this option is not needed
+            fscanf(file_stream, "%2hx%2hx%2hx\n", &red, &green, &blue);
+        } else {
+            fseek(file_stream, -1, SEEK_CUR);
+            fscanf(file_stream, "%hu %hu %hu\n", &red, &green, &blue);
+        }
+        
+        init_color(start + i, red * 1000 / 255, green * 1000 / 255, blue * 1000 / 255);
+        init_pair(buffer, start + i, -1);
+
+        ++i;
+    }
+    
+    fclose(file_stream);
 };
 
 #endif
