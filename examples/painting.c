@@ -1,4 +1,4 @@
-#define TECO_NCURSES
+#define TECO_NCURSESW
 #include "../teco.h"
 
 int main(int argc, char *argv[]) {

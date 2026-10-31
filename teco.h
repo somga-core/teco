@@ -609,9 +609,13 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
     va_end(effect_args);
 };
 
-#elif defined(TECO_NCURSES)
+#elif defined(TECO_NCURSES) || defined(TECO_NCURSESW)
 
+#ifdef TECO_NCURSES
 #include <ncurses.h>
+#else
+#include <ncursesw/ncurses.h>
+#endif
 
 void teco_image_draw(teco_image* image, unsigned dx, unsigned dy);
 void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, unsigned dy);
