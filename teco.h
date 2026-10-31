@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <math.h>
 
 // Maybe add background layer
 
@@ -54,7 +55,7 @@ teco_image teco_image_create(unsigned char layer_count, unsigned width, unsigned
 
     image.data = malloc(width * height * layer_count);
 
-    teco_image_fill(&image, TECO_SCE, "\0\0\0");
+    teco_image_fill(&image, TECO_SCE & (unsigned) (pow(TECO_LAYER_MASK + 1, layer_count) - 1), "\0\0\0");
 
     return image;
 };
@@ -89,7 +90,7 @@ teco_image teco_image_import(char* path, unsigned char layers) {
     char space_symbol;
     FILE* file_stream = fopen(path, "r");
 
-    if (!file_stream) return teco_image_create(0, 0, 0);
+    if (!file_stream) return teco_image_create(1, 0, 0);
 
     fscanf(file_stream, "%u %u %c", &width, &height, &space_symbol);
 
@@ -97,18 +98,14 @@ teco_image teco_image_import(char* path, unsigned char layers) {
 
     unsigned char layer_count = 0;
     for (
-        unsigned char shifted = layers;
-        (shifted & TECO_LAYER_MASK) != 0;
-        shifted >>= TECO_LAYER_BITS
-    ) ++layer_count;
-
-    teco_image image = teco_image_create(layer_count, width, height);
-
-    for (
         unsigned char layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
         shifted >>= TECO_LAYER_BITS
-    ) {
+    ) if (layer > layer_count) layer_count = layer;
+
+    teco_image image = teco_image_create(layer_count, width, height);
+
+    for (unsigned char layer = 1; layer <= layer_count; layer++) {
         for (unsigned y = 0; y < image.height; y++) {
             for (
                 unsigned x = 0;
@@ -536,45 +533,69 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
 
     unsigned symbol_width = render_width / image->width;
     unsigned symbol_height = render_height / image->height;
+    
+    va_list effect_args;
 
-    char color_char, symbol, effect_char;
-    unsigned short color_index, texture_index, effect_index;
-
+    if (image->layer_count >= 3) {
+        va_start(effect_args, font);
+    }
+    
     unsigned char red = 255, green = 255, blue = 255;
-
-    teco_effect effect;
-    float dx = 0, dy = 0, scale_x = 1, scale_y = 1;
-
-    va_list effect_args, effect_args_temp;
-    va_start(effect_args, font);
-
-    SDL_Texture* texture;
-    SDL_Surface* surface;
-    SDL_Rect rectangle = {0, 0, symbol_width, symbol_height};
-    SDL_Color foreground = {255, 255, 255};
-
-    char render_text[2] = " ";
+    SDL_Color render_color = {255, 255, 255};
 
     for (unsigned y = 0; y < image->height; y++) {
         for (unsigned x = 0; x < image->width; x++) {
-            symbol = teco_image_get(image, TECO_S, x, y);
+            char render_text[2] = " ";
+
+            char symbol = teco_image_get(image, TECO_S, x, y);
             if (symbol == '\0' || symbol == ' ') continue;
 
-            color_char = teco_image_get(image, TECO_C, x, y);
-            if (color_char != '\0') {
-                color_index = teco_palette_get_index(palette, color_char);
-                if (color_index != palette->size)
-                    teco_palette_get_color(
-                        palette, color_index,
-                        &red, &green, &blue
-                    );
+            SDL_Rect rectangle = {
+                symbol_width * x, symbol_height * y,
+                symbol_width, symbol_height
+            };
+
+            if (image->layer_count >= 2) {
+                char color_char = teco_image_get(image, TECO_C, x, y);
+                if (color_char != '\0') {
+                    unsigned short color_index = teco_palette_get_index(palette, color_char);
+                    if (color_index != palette->size)
+                        teco_palette_get_color(
+                            palette, color_index,
+                            &red, &green, &blue
+                        );
+                }
+
+                if (image->layer_count >= 3) {
+                    char effect_char = teco_image_get(image, TECO_E, x, y);
+        
+                    if (effect_char != '\0') {
+                        unsigned short effect_index = teco_bulb_get_index(bulb, effect_char);
+        
+                        if (effect_index != bulb->size) {
+                            teco_effect effect = teco_bulb_get_effect(bulb, effect_index);
+        
+                            float dx = 0, dy = 0, scale_x = 1, scale_y = 1;
+                            
+                            va_list effect_args_temp;
+                            va_copy(effect_args_temp, effect_args);
+                            effect(&dx, &dy, &scale_x, &scale_y, x, y, effect_args_temp);
+        
+                            rectangle.x += symbol_width * (dx + (1 - scale_x) * .5);
+                            rectangle.y += symbol_height * (dy + (1 - scale_y) * .5);
+                            rectangle.w *= scale_x;
+                            rectangle.h *= scale_y;
+                        }
+                    }
+                }
             }
 
-            texture_index = teco_cache_get_index(cache, symbol);
+            unsigned short texture_index = teco_cache_get_index(cache, symbol);
+            SDL_Texture* texture;
             if (texture_index == cache->size) {
                 render_text[0] = symbol;
                 
-                surface = TECO_RENDER_TEXT(font, render_text, foreground);
+                SDL_Surface* surface = TECO_RENDER_TEXT(font, render_text, render_color);
                 texture = SDL_CreateTextureFromSurface(renderer, surface);
 
                 teco_cache_add(cache, symbol, texture);
@@ -582,30 +603,6 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
                 SDL_FreeSurface(surface);
             } else {
                 texture = teco_cache_get_texture(cache, texture_index);
-            }
-
-            rectangle.x = symbol_width * x;
-            rectangle.y = symbol_height * y;
-            rectangle.w = symbol_width;
-            rectangle.h = symbol_height;
-
-            effect_char = teco_image_get(image, TECO_E, x, y);
-
-            if (effect_char != '\0') {
-                effect_index = teco_bulb_get_index(bulb, effect_char);
-
-                if (effect_index != bulb->size) {
-                    effect = teco_bulb_get_effect(bulb, effect_index);
-
-                    dx = 0; dy = 0; scale_x = 1; scale_y = 1;
-                    va_copy(effect_args_temp, effect_args);
-                    effect(&dx, &dy, &scale_x, &scale_y, x, y, effect_args_temp);
-
-                    rectangle.x += symbol_width * (dx + (1 - scale_x) * .5);
-                    rectangle.y += symbol_height * (dy + (1 - scale_y) * .5);
-                    rectangle.w *= scale_x;
-                    rectangle.h *= scale_y;
-                }
             }
 
             SDL_SetTextureColorMod(texture, red, green, blue);

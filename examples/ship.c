@@ -1,7 +1,6 @@
 #define TECO_SDL2
 // #define TECO_RENDER_TEXT_SOLID
 #include "../teco.h"
-#include <math.h>
 
 #define FPS 60
 
@@ -43,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     SDL_Event event;
 
-    teco_image image = teco_image_import("examples/assets/ship.tci", TECO_SCE);
+    teco_image image = teco_image_import("examples/assets/ship.tci", TECO_SE);
     teco_palette palette = teco_palette_import("examples/assets/core.tcp");
     teco_cache cache = teco_cache_create();
 
