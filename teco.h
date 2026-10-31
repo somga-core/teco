@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define TECO_LAYERS 3
+// Maybe add background layer
+
 #define TECO_LAYER_BITS 2
 #define TECO_LAYER_MASK 0b11
 
@@ -22,15 +23,17 @@
 // DECLARATION!!!!!
 typedef struct teco_image {
     unsigned width; unsigned height;
-    char* data[TECO_LAYERS];
+    unsigned char layer_count;
+    char* data;
 } teco_image;
 
-teco_image teco_image_create(unsigned width, unsigned height);
+teco_image teco_image_create(unsigned char layer_count, unsigned width, unsigned height);
 teco_image teco_image_copy(teco_image* image, unsigned char layers);
 teco_image teco_image_import(char* path, unsigned char layers);
 
 void teco_image_delete(teco_image* image);
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
+void teco_image_relayer_count(teco_image* image, unsigned char new_layer_count);
 
 void teco_image_export(teco_image* image, char* path, char space_symbol);
 
@@ -46,13 +49,10 @@ void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
 void teco_image_print(teco_image* image, unsigned char layers);
 
 // IMPLEMENTATION!!!!!
-teco_image teco_image_create(unsigned width, unsigned height) {
-    teco_image image = {.width=width, .height=height};
+teco_image teco_image_create(unsigned char layer_count, unsigned width, unsigned height) {
+    teco_image image = {.layer_count=layer_count, .width=width, .height=height};
 
-    unsigned long long size = width * height;
-
-    for (char layer = 0; layer < TECO_LAYERS; layer++)
-        image.data[layer] = malloc(size);
+    image.data = malloc(width * height * layer_count);
 
     teco_image_fill(&image, TECO_SCE, "\0\0\0");
 
@@ -60,7 +60,7 @@ teco_image teco_image_create(unsigned width, unsigned height) {
 };
 
 teco_image teco_image_copy(teco_image* image, unsigned char layers) {
-    teco_image new_image = teco_image_create(image->width, image->height);
+    teco_image new_image = teco_image_create(image->layer_count, image->width, image->height);
 
     for (
         unsigned char layer, shifted = layers;
@@ -89,13 +89,20 @@ teco_image teco_image_import(char* path, unsigned char layers) {
     char space_symbol;
     FILE* file_stream = fopen(path, "r");
 
-    if (!file_stream) return teco_image_create(0, 0);
+    if (!file_stream) return teco_image_create(0, 0, 0);
 
     fscanf(file_stream, "%u %u %c", &width, &height, &space_symbol);
 
     while (getc(file_stream) != '\n') {};
 
-    teco_image image = teco_image_create(width, height);
+    unsigned char layer_count = 0;
+    for (
+        unsigned char shifted = layers;
+        (shifted & TECO_LAYER_MASK) != 0;
+        shifted >>= TECO_LAYER_BITS
+    ) ++layer_count;
+
+    teco_image image = teco_image_create(layer_count, width, height);
 
     for (
         unsigned char layer, shifted = layers;
@@ -126,15 +133,14 @@ teco_image_import_end:
 };
 
 void teco_image_delete(teco_image* image) {
-    for (char layer = 0; layer < TECO_LAYERS; layer++)
-        free(image->data[layer]);
+    free(image->data);
 
     image->width = 0;
     image->height = 0;
 };
 
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height) {
-    teco_image new_image = teco_image_create(new_width, new_height);
+    teco_image new_image = teco_image_create(image->layer_count, new_width, new_height);
 
     teco_image_apply(&new_image, image, TECO_SCE, 0, 0);
 
@@ -150,7 +156,7 @@ void teco_image_export(teco_image* image, char* path, char space_symbol) {
 
     fprintf(file_stream, "%u %u %c\n", image->width, image->height, space_symbol);
 
-    for (unsigned char layer = 1; layer <= TECO_LAYERS; layer++) {
+    for (unsigned char layer = 1; layer <= image->layer_count; layer++) {
         for (unsigned y = 0; y < image->height; y++) {
             for (unsigned x = 0; x < image->width; x++) {
                 char character = teco_image_get(image, layer, x, y);
@@ -226,11 +232,11 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
 };
 
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y) {
-    return image->data[layer - 1][image->width * y + x];
+    return image->data[image->width * image->height * (layer - 1) + image->width * y + x];
 };
 
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y) {
-    image->data[layer - 1][image->width * y + x] = character;
+    image->data[image->width * image->height * (layer - 1) + image->width * y + x] = character;
 };
 
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long xl, long yu, long xr, long yd) {
@@ -300,7 +306,7 @@ void teco_image_print(teco_image* image, unsigned char layers) {
 
 // DECLARATION!!!
 typedef struct teco_palette {
-    char* characters;
+    unsigned char indices[256];
     unsigned char* colors;
     unsigned short size;
 } teco_palette;
@@ -313,11 +319,10 @@ void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char r
 void teco_palette_set_hex(teco_palette* palette, char character, char* hex); // Maybe this function is not needed
 
 unsigned short teco_palette_get_index(teco_palette* palette, char character);
-char teco_palette_get_character(teco_palette* palette, unsigned short index);
 void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue);
 
 typedef struct teco_cache {
-    char* symbols; // Previously this was named charcol (Short for character & color) (Pun intended)
+    unsigned char indices[256];
     SDL_Texture** textures;
     unsigned short size;
     // Maybe replace "symbols" with "keys" variable: 256 elements long array of chars, that stores indices of textures
@@ -329,13 +334,12 @@ void teco_cache_delete(teco_cache* cache);
 void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture);
 
 unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
-char teco_cache_get_symbol(teco_cache* cache, unsigned short index);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
 
 typedef void (*teco_effect) (float*, float*, float*, float*, unsigned, unsigned, va_list args);
 
 typedef struct teco_bulb {
-    char* characters;
+    unsigned char indices[256];
     teco_effect* effects;
     unsigned short size;
 } teco_bulb; // Maybe call this shaderpack. Sane name is needed
@@ -346,7 +350,6 @@ void teco_bulb_delete(teco_bulb* bulb);
 void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect);
 
 unsigned short teco_bulb_get_index(teco_bulb* bulb, char character);
-char teco_bulb_get_character(teco_bulb* bulb, unsigned short index);
 teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
 // Maybe condence theese similar functions somehow
 // Maybe add function to delete only one element from palette or bulb
@@ -383,16 +386,19 @@ teco_palette teco_palette_import(char* path) {
 };
 
 teco_palette teco_palette_create() {
-    teco_palette palette = {.size=0, .characters=NULL, .colors=NULL};
+    teco_palette palette = {.size=0, .colors=NULL};
+
+    for (unsigned short i = 0; i < 256; i++) {
+        palette.indices[i] = 255;
+    }
+
     return palette;
 };
 
 void teco_palette_delete(teco_palette* palette) {
-    free(palette->characters);
     free(palette->colors);
 
     palette->size = 0;
-    palette->characters = NULL;
     palette->colors = NULL;
 };
 
@@ -404,14 +410,12 @@ void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char r
     if (index != palette->size) {
         color_index = index * 3;
     } else {
+        palette->indices[(unsigned char) character] = palette->size;
+        color_index = (palette->size) * 3;
+
         ++(palette->size);
 
-        palette->characters = realloc(palette->characters, palette->size);
         palette->colors = realloc(palette->colors, palette->size * 3);
-
-        palette->characters[palette->size - 1] = character;
-
-        color_index = (palette->size - 1) * 3;
     }
 
     palette->colors[color_index] = red;
@@ -428,17 +432,11 @@ void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
 };
 
 unsigned short teco_palette_get_index(teco_palette* palette, char character) {
-    unsigned short index = 0;
+    unsigned short index = palette->indices[(unsigned char) character];
 
-    while (index < palette->size && palette->characters[index] != character)
-        ++index;
-
+    if (index == 255) return palette->size;
     return index;
 };
-
-char teco_palette_get_character(teco_palette* palette, unsigned short index) {
-    return palette->characters[index];
-}
 
 void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue) {
     unsigned short color_index = index * 3;
@@ -449,7 +447,11 @@ void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigne
 };
 
 teco_cache teco_cache_create() {
-    teco_cache cache = {.size=0, .symbols=NULL, .textures=NULL};
+    teco_cache cache = {.size=0, .textures=NULL};
+
+    for (unsigned short i = 0; i < 256; i++) {
+        cache.indices[i] = 255;
+    }
 
     return cache;
 };
@@ -459,35 +461,27 @@ void teco_cache_delete(teco_cache* cache) {
         SDL_DestroyTexture(cache->textures[index]);
     }
 
-    free(cache->symbols);
     free(cache->textures);
 
     cache->size = 0;
-    cache->symbols = NULL;
     cache->textures = NULL;
 };
 
 void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture) {
+    cache->indices[(unsigned char) symbol] = cache->size;
+
     ++(cache->size);
 
-    cache->symbols = realloc(cache->symbols, cache->size);
     cache->textures = realloc(cache->textures, cache->size * sizeof(SDL_Texture*));
 
     cache->textures[cache->size - 1] = texture;
-    cache->symbols[cache->size - 1] = symbol;
 };
 
 unsigned short teco_cache_get_index(teco_cache* cache, char symbol) {
-    unsigned short index = 0;
+    unsigned short index = cache->indices[(unsigned char) symbol];
 
-    while (index < cache->size && cache->symbols[index] != symbol)
-        ++index;
-
+    if (index == 255) return cache->size;
     return index;
-};
-
-char teco_cache_get_symbol(teco_cache* cache, unsigned short index) {
-    return cache->symbols[index];
 };
 
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index) {
@@ -495,17 +489,19 @@ SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index) {
 };
 
 teco_bulb teco_bulb_create() {
-    teco_bulb bulb = {.size=0, .characters=NULL, .effects=NULL};
+    teco_bulb bulb = {.size=0, .effects=NULL};
+
+    for (unsigned short i = 0; i < 256; i++) {
+        bulb.indices[i] = 255;
+    }
 
     return bulb;
 };
 
 void teco_bulb_delete(teco_bulb* bulb) {
-    free(bulb->characters);
     free(bulb->effects);
 
     bulb->size = 0;
-    bulb->characters = NULL;
     bulb->effects = NULL;
 };
 
@@ -513,28 +509,21 @@ void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect) {
     unsigned short index = teco_bulb_get_index(bulb, character);
 
     if (index == bulb->size) {
+        bulb->indices[(unsigned char) character] = bulb->size;
+
         ++(bulb->size);
 
-        bulb->characters = realloc(bulb->characters, bulb->size);
         bulb->effects = realloc(bulb->effects, bulb->size * sizeof(teco_effect));
-
-        bulb->characters[bulb->size - 1] = character;
     }
 
     bulb->effects[index] = effect;
 };
 
 unsigned short teco_bulb_get_index(teco_bulb* bulb, char character) {
-    unsigned short index = 0;
+    unsigned short index = bulb->indices[(unsigned char) character];
 
-    while (index < bulb->size && bulb->characters[index] != character)
-        ++index;
-
+    if (index == 255) return bulb->size;
     return index;
-};
-
-char teco_bulb_get_character(teco_bulb* bulb, unsigned short index) {
-    return bulb->characters[index];
 };
 
 teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index) {

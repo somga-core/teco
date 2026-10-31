@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     teco_palette_set_hex(&palette, 'a', "#ff0000");
 
     for (unsigned i = 0; i < palette.size; i++)
-        printf("%d %c %d-%d-%d\n", palette.size, palette.characters[i], palette.colors[i*3], palette.colors[i*3+1], palette.colors[i*3+2]);
+        printf("%d %d-%d-%d\n", palette.size, palette.colors[i*3], palette.colors[i*3+1], palette.colors[i*3+2]);
 
     unsigned char red, green, blue;
     unsigned index = teco_palette_get_index(&palette, 'z');
