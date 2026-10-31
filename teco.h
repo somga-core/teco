@@ -43,6 +43,7 @@ void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply,
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y);
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y);
 
+// Maybe specify in rect function two parameters: fill char and border char
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
@@ -322,7 +323,6 @@ typedef struct teco_cache {
     unsigned char indices[256];
     SDL_Texture** textures;
     unsigned short size;
-    // Maybe replace "symbols" with "keys" variable: 256 elements long array of chars, that stores indices of textures
 } teco_cache;
 
 teco_cache teco_cache_create();
