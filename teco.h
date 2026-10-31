@@ -30,7 +30,7 @@ typedef struct teco_image {
 
 teco_image teco_image_create(unsigned char layer_count, unsigned width, unsigned height);
 teco_image teco_image_copy(teco_image* image, unsigned char layers);
-teco_image teco_image_import(char* path, unsigned char layers);
+teco_image teco_image_import(char* path, unsigned char layer_count);
 
 void teco_image_delete(teco_image* image);
 void teco_image_resize(teco_image* image, unsigned new_width, unsigned new_height);
@@ -83,7 +83,7 @@ teco_image teco_image_copy(teco_image* image, unsigned char layers) {
     return new_image;
 };
 
-teco_image teco_image_import(char* path, unsigned char layers) {
+teco_image teco_image_import(char* path, unsigned char layer_count) {
     unsigned width = 0, height = 0;
     char buffer;
     // All "space" synbols in file will become spaces in image,
@@ -96,13 +96,6 @@ teco_image teco_image_import(char* path, unsigned char layers) {
     fscanf(file_stream, "%u %u %c", &width, &height, &space_symbol);
 
     while (getc(file_stream) != '\n') {};
-
-    unsigned char layer_count = 0;
-    for (
-        unsigned char layer, shifted = layers;
-        (layer = shifted & TECO_LAYER_MASK) != 0;
-        shifted >>= TECO_LAYER_BITS
-    ) if (layer > layer_count) layer_count = layer;
 
     teco_image image = teco_image_create(layer_count, width, height);
 

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     teco_image background = teco_image_copy(&image1, TECO_SC);
     teco_image_fill(&background, TECO_E, "&");
 
-    teco_image object = teco_image_import("examples/assets/test.tci", TECO_SCE);
+    teco_image object = teco_image_import("examples/assets/test.tci", 3);
 
     teco_image_apply(&background, &object, TECO_SCE, 1, 1);
 

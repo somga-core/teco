@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     SDL_Event event;
 
-    teco_image image = teco_image_import("examples/assets/ship.tci", TECO_SE);
+    teco_image image = teco_image_import("examples/assets/ship.tci", 3);
     teco_palette palette = teco_palette_import("examples/assets/core.tcp");
     teco_cache cache = teco_cache_create();
 
