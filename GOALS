@@ -1,0 +1,27 @@
+A FUCKING PROJECT GOALS
+
+What was bad in legacy version:
+
+ - Bloated sprite and animations system
+
+ - Predeclared structure of a program (e.g. mainloop system) and
+   therefore limited usability of all SDL2 and Ncurses functions
+
+ - Too many files for small image
+
+What we want from new version:
+
+ - Only one structure: image (With ability to plot data from file
+   and other images on it and show it on screen)
+
+ - More flexible symbols drawing system (Single-symbol operations on
+   a screen, area filling operations, drawing primitives)
+
+ - One-headder file
+
+ - One file per image
+
+ - Embeding in a project only as a QOL tool and not a structure
+   defining engine
+
+ - Improved effects system

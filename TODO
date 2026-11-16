@@ -1,43 +1,42 @@
 A FUCKING TODO LIST
 
-What we don't want:
+Here is what is done:
 
- - Bloated sprite and animations system
+ - Image system with some basic drawing functions
 
- - Selecting output mode at runtime and start of a program
+ - Palette system
 
- - Embeded mainloop system
+ - Unoptimized effects system
 
-What we 100% want:
+ - SDL2 and Ncurses integration
 
- - Change output mode by changing only one "#define"
+Here are things that are not yet implemented:
 
- - More flexible symbols drawing system (Single-symbol operations on
-   a screen, area filling operations)
+ - Raylib integration
 
- - One-headder file
+ - More image drawing functions (draw_line, draw_circle, etc.)
 
- - Gorgeous and beautiful effect system
+ - Documentation imbedded in a header
 
- - One file per full image (Colors and effects included)
+ - Sane name for a fucking bulb
 
- - Only one class (Structure): image (With ability to plot data from
-   file and other images on it and show it on screen)
+Here are things on which we are not totaly sure about:
 
- - Ability to manipulate SLD2 and NCurses
+ - Effect drawing optimizations (Pre-calculating effects which only
+   depend on one or less dimentions)
 
- - Sane system for color manipulations
+ - Effect arguments as a separate layer or some other improvment of
+   effects system in a similar way
 
- - Empty symbol embeded in image format
+ - Declare several small function as "static inline"
 
- - Separate ASCII image editing tool
+ - Separate outline and fill arguments in functions that draw
+   primitives
 
-What we maybe don't want:
+ - Condence similar functions that manipulate palette, cache and bulb
 
- - Unified key, and maybe mouse handling systems across two output
-   modes and maybe sounds in gui
+ - Add function to delete only one element from palette and bulb
 
-A few concerns about structure present in the files:
+ - Remove hex color codes cause they are useless
 
- - Do we need to declare several small function as "static inline"
-   or not
+ - Invert behavour of space symbol in image files
