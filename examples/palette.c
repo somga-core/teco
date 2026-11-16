@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
     teco_palette_get_color(&palette, index, &red, &green, &blue);
 
-    printf("%d %d-%d-%d", index, red, green, blue);
+    printf("%d %d-%d-%d\n", index, red, green, blue);
     
     teco_palette_delete(&palette);
 
