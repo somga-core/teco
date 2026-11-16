@@ -3,13 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <math.h>
 
-// Maybe add background layer
+// DECLARATION!!!
 
 #define TECO_LAYER_BITS 2
 #define TECO_LAYER_MASK 0b11
+#define TECO_DEFAULT_FILL "\0\0\0"
 
 #define TECO_S 0b01
 #define TECO_C 0b10
@@ -21,7 +21,8 @@
 
 #define TECO_SCE 0b111001
 
-// DECLARATION!!!!!
+#define TECO_ALL 0b111001
+
 typedef struct teco_image {
     unsigned width; unsigned height;
     unsigned char layer_count;
@@ -42,20 +43,87 @@ void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply,
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y);
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y);
 
-// Maybe specify in rect function two parameters: fill char and border char
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
 
 void teco_image_print(teco_image* image, unsigned char layers);
 
-// IMPLEMENTATION!!!!!
+#if defined(TECO_SDL2)
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <stdarg.h>
+
+#ifdef TECO_RENDER_TEXT_SOLID
+#define TECO_RENDER_TEXT TTF_RenderText_Solid
+#else
+#define TECO_RENDER_TEXT TTF_RenderText_Blended
+#endif
+
+typedef struct teco_palette {
+    unsigned char indices[256];
+    unsigned char* colors;
+    unsigned short size;
+} teco_palette;
+
+teco_palette teco_palette_import(char* path);
+teco_palette teco_palette_create();
+void teco_palette_delete(teco_palette* palette);
+void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
+void teco_palette_set_hex(teco_palette* palette, char character, char* hex);
+unsigned short teco_palette_get_index(teco_palette* palette, char character);
+void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue);
+
+typedef struct teco_cache {
+    unsigned char indices[256];
+    SDL_Texture** textures;
+    unsigned short size;
+} teco_cache;
+
+teco_cache teco_cache_create();
+void teco_cache_delete(teco_cache* cache);
+void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture);
+unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
+SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
+
+typedef void (*teco_effect) (float*, float*, float*, float*, unsigned, unsigned, va_list args);
+typedef struct teco_bulb {
+    unsigned char indices[256];
+    teco_effect* effects;
+    unsigned short size;
+} teco_bulb;
+
+teco_bulb teco_bulb_create();
+void teco_bulb_delete(teco_bulb* bulb);
+void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect);
+unsigned short teco_bulb_get_index(teco_bulb* bulb, char character);
+teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
+
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...);
+
+#elif defined(TECO_NCURSES) || defined(TECO_NCURSESW)
+
+#ifdef TECO_NCURSES
+#include <ncurses.h>
+#else
+#include <ncursesw/ncurses.h>
+#endif
+
+void teco_image_draw(teco_image* image, unsigned dx, unsigned dy);
+void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, unsigned dy);
+
+void teco_palette_import(char* path, short start);
+
+#endif
+
+// IMPLEMENTATION!!!
 teco_image teco_image_create(unsigned char layer_count, unsigned width, unsigned height) {
     teco_image image = {.layer_count=layer_count, .width=width, .height=height};
 
     image.data = malloc(width * height * layer_count);
 
-    teco_image_fill(&image, TECO_SCE & (unsigned) (pow(TECO_LAYER_MASK + 1, layer_count) - 1), "\0\0\0");
+    teco_image_fill(&image, TECO_ALL & (unsigned) (pow(TECO_LAYER_MASK + 1, layer_count) - 1), TECO_DEFAULT_FILL);
 
     return image;
 };
@@ -107,8 +175,6 @@ teco_image teco_image_import(char* path, unsigned char layer_count) {
             ) {
                 if (buffer == EOF) goto teco_image_import_end;
 
-                // Maybe invert this behavour and specify in a
-                // file not a space symbol, but an empty symbol
                 if (buffer == space_symbol)
                     teco_image_set(&image, layer, ' ', x, y);
                 else if (buffer != ' ')
@@ -135,7 +201,7 @@ void teco_image_resize(teco_image* image, unsigned char new_layer_count, unsigne
     unsigned char copy_layer_count = new_layer_count;
     if (copy_layer_count > image->layer_count) copy_layer_count = image->layer_count;
 
-    teco_image_apply(&new_image, image, TECO_SCE & (unsigned) (pow(TECO_LAYER_MASK + 1, copy_layer_count) - 1), 0, 0);
+    teco_image_apply(&new_image, image, TECO_ALL & (unsigned) (pow(TECO_LAYER_MASK + 1, copy_layer_count) - 1), 0, 0);
 
     teco_image_delete(image);
 
@@ -288,67 +354,6 @@ void teco_image_print(teco_image* image, unsigned char layers) {
 
 #if defined(TECO_SDL2)
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-
-#ifdef TECO_RENDER_TEXT_SOLID
-#define TECO_RENDER_TEXT TTF_RenderText_Solid
-#else
-#define TECO_RENDER_TEXT TTF_RenderText_Blended
-#endif
-
-// DECLARATION!!!
-typedef struct teco_palette {
-    unsigned char indices[256];
-    unsigned char* colors;
-    unsigned short size;
-} teco_palette;
-
-teco_palette teco_palette_import(char* path);
-teco_palette teco_palette_create();
-void teco_palette_delete(teco_palette* palette);
-
-void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
-void teco_palette_set_hex(teco_palette* palette, char character, char* hex); // Maybe this function is not needed
-
-unsigned short teco_palette_get_index(teco_palette* palette, char character);
-void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue);
-
-typedef struct teco_cache {
-    unsigned char indices[256];
-    SDL_Texture** textures;
-    unsigned short size;
-} teco_cache;
-
-teco_cache teco_cache_create();
-void teco_cache_delete(teco_cache* cache);
-
-void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture);
-
-unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
-SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
-
-typedef void (*teco_effect) (float*, float*, float*, float*, unsigned, unsigned, va_list args);
-
-typedef struct teco_bulb {
-    unsigned char indices[256];
-    teco_effect* effects;
-    unsigned short size;
-} teco_bulb; // Maybe call this shaderpack. Sane name is needed
-
-teco_bulb teco_bulb_create();
-void teco_bulb_delete(teco_bulb* bulb);
-
-void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect);
-
-unsigned short teco_bulb_get_index(teco_bulb* bulb, char character);
-teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
-// Maybe condence theese similar functions somehow
-// Maybe add function to delete only one element from palette or bulb
-
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...);
-
-// IMPLEMENTATION!!!
 teco_palette teco_palette_import(char* path) {
     teco_palette palette = teco_palette_create();
 
@@ -362,7 +367,7 @@ teco_palette teco_palette_import(char* path) {
     while ((buffer = fgetc(file_stream)) != EOF) {
         fseek(file_stream, 1, SEEK_CUR);
 
-        if (fgetc(file_stream) == '#') { // Maybe this option is not needed
+        if (fgetc(file_stream) == '#') {
             fscanf(file_stream, "%2hx%2hx%2hx\n", &red, &green, &blue);
         } else {
             fseek(file_stream, -1, SEEK_CUR);
@@ -611,17 +616,6 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
 
 #elif defined(TECO_NCURSES) || defined(TECO_NCURSESW)
 
-#ifdef TECO_NCURSES
-#include <ncurses.h>
-#else
-#include <ncursesw/ncurses.h>
-#endif
-
-void teco_image_draw(teco_image* image, unsigned dx, unsigned dy);
-void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, unsigned dy);
-
-void teco_palette_import(char* path, short start);
-
 void teco_image_draw(teco_image* image, unsigned dx, unsigned dy) {
     for (unsigned y = 0; y < image->height; y++) {
         for (unsigned x = 0; x < image->width; x++) {
@@ -676,7 +670,7 @@ void teco_palette_import(char* path, short start) {
     while ((buffer = fgetc(file_stream)) != EOF) {
         fseek(file_stream, 1, SEEK_CUR);
 
-        if (fgetc(file_stream) == '#') { // Maybe this option is not needed
+        if (fgetc(file_stream) == '#') {
             fscanf(file_stream, "%2hx%2hx%2hx\n", &red, &green, &blue);
         } else {
             fseek(file_stream, -1, SEEK_CUR);
