@@ -18,11 +18,11 @@ Here are things that are not yet implemented:
 
  - More image drawing functions (draw_line, draw_circle, etc.)
 
- - Documentation imbedded in a header
+ - Documentation embedded in a header
 
  - Sane name for a fucking bulb
 
-Here are things on which we are not totaly sure about:
+Here are things about which we are not totaly sure about:
 
  - Turn palettes, caches and bulbs into hashmaps
 
