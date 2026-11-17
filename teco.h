@@ -6,7 +6,6 @@
 #include <math.h>
 
 // DECLARATION!!!
-
 #define TECO_LAYER_BITS 2
 #define TECO_LAYER_MASK 0b11
 #define TECO_DEFAULT_FILL "\0\0\0"
@@ -70,8 +69,10 @@ typedef struct teco_palette {
 teco_palette teco_palette_import(char* path);
 teco_palette teco_palette_create();
 void teco_palette_delete(teco_palette* palette);
+
 void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue);
 void teco_palette_set_hex(teco_palette* palette, char character, char* hex);
+
 unsigned short teco_palette_get_index(teco_palette* palette, char character);
 void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue);
 
@@ -83,7 +84,9 @@ typedef struct teco_cache {
 
 teco_cache teco_cache_create();
 void teco_cache_delete(teco_cache* cache);
+
 void teco_cache_add(teco_cache* cache, char symbol, SDL_Texture* texture);
+
 unsigned short teco_cache_get_index(teco_cache* cache, char symbol);
 SDL_Texture* teco_cache_get_texture(teco_cache* cache, unsigned short index);
 
@@ -96,11 +99,13 @@ typedef struct teco_bulb {
 
 teco_bulb teco_bulb_create();
 void teco_bulb_delete(teco_bulb* bulb);
+
 void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect);
+
 unsigned short teco_bulb_get_index(teco_bulb* bulb, char character);
 teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index);
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...);
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, SDL_Rect draw_rect, TTF_Font* font, ...);
 
 #elif defined(TECO_NCURSES) || defined(TECO_NCURSESW)
 
@@ -527,12 +532,9 @@ teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index) {
     return bulb->effects[index];
 };
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TTF_Font* font, ...) {
-    unsigned render_width, render_height;
-    SDL_GetRendererOutputSize(renderer, &render_width, &render_height);
-
-    unsigned symbol_width = render_width / image->width;
-    unsigned symbol_height = render_height / image->height;
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, SDL_Rect draw_rect, TTF_Font* font, ...) {
+    unsigned symbol_width = draw_rect.w / image->width;
+    unsigned symbol_height = draw_rect.h / image->height;
     
     va_list effect_args;
 
@@ -550,8 +552,8 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
             char symbol = teco_image_get(image, TECO_S, x, y);
             if (symbol == '\0' || symbol == ' ') continue;
 
-            SDL_Rect rectangle = {
-                symbol_width * x, symbol_height * y,
+            SDL_Rect symbol_rect = {
+                draw_rect.x + symbol_width * x, draw_rect.y + symbol_height * y,
                 symbol_width, symbol_height
             };
 
@@ -581,10 +583,10 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
                             va_copy(effect_args_temp, effect_args);
                             effect(&dx, &dy, &scale_x, &scale_y, x, y, effect_args_temp);
         
-                            rectangle.x += symbol_width * (dx + (1 - scale_x) * .5);
-                            rectangle.y += symbol_height * (dy + (1 - scale_y) * .5);
-                            rectangle.w *= scale_x;
-                            rectangle.h *= scale_y;
+                            symbol_rect.x += symbol_width * (dx + (1 - scale_x) * .5);
+                            symbol_rect.y += symbol_height * (dy + (1 - scale_y) * .5);
+                            symbol_rect.w *= scale_x;
+                            symbol_rect.h *= scale_y;
                         }
                     }
                 }
@@ -607,7 +609,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
 
             SDL_SetTextureColorMod(texture, red, green, blue);
 
-            SDL_RenderCopy(renderer, texture, NULL, &rectangle);
+            SDL_RenderCopy(renderer, texture, NULL, &symbol_rect);
         }
     }
 

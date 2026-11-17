@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
     teco_palette palette = teco_palette_import("examples/assets/core.tcp");
     teco_cache cache = teco_cache_create();
 
+    SDL_Rect window_rect = {0, 0, 0, 0};
+
     teco_bulb bulb = teco_bulb_create();
     teco_bulb_set(&bulb, '#', &effect_wave);
     teco_bulb_set(&bulb, '/', &effect_ship);
@@ -60,7 +62,9 @@ int main(int argc, char *argv[]) {
 
         SDL_RenderClear(renderer);
 
-        teco_image_draw(&image, &palette, &bulb, renderer, &cache, font, SDL_GetTicks());
+		SDL_GetWindowSize(window, &window_rect.w, &window_rect.h);
+
+        teco_image_draw(&image, &palette, &bulb, renderer, &cache, window_rect, font, SDL_GetTicks());
 
         SDL_RenderPresent(renderer);
 

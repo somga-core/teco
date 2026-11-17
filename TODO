@@ -14,6 +14,8 @@ Here are things that are not yet implemented:
 
  - Raylib integration
 
+ - Ncursesw integration
+
  - More image drawing functions (draw_line, draw_circle, etc.)
 
  - Documentation imbedded in a header
@@ -21,6 +23,8 @@ Here are things that are not yet implemented:
  - Sane name for a fucking bulb
 
 Here are things on which we are not totaly sure about:
+
+ - Turn palettes, caches and bulbs into hashmaps
 
  - Effect drawing optimizations (Pre-calculating effects which only
    depend on one or less dimentions)
