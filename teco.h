@@ -42,8 +42,11 @@ void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply,
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y);
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y);
 
-void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
+void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
+void teco_image_hrect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
+void teco_image_circle(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
+void teco_image_hcircle(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
 
 void teco_image_print(teco_image* image, unsigned char layers);
@@ -272,7 +275,7 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
     else
         image_yd = image->height;
 
-    // Draw
+    // Plot
     for (
         unsigned char layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
