@@ -10,9 +10,9 @@ Here is what is done:
 
  - SDL2 and Ncurses integration
 
-Here are things that are not yet implemented:
-
  - Raylib integration
+ 
+Here are things that are not yet implemented:
 
  - Ncursesw integration
 
@@ -37,7 +37,8 @@ Here are things about which we are not totaly sure about:
  - Separate outline and fill arguments in functions that draw
    primitives
 
- - Condence similar functions that manipulate palette, cache and bulb
+ - Condence similar functions that manipulate palette, cache, bulb
+   and draw image on screen
 
  - Add function to delete only one element from palette and bulb
 

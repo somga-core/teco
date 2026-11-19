@@ -12,6 +12,12 @@ sdl2: clean
 ncurses: clean
 	$(CC) -o $(OUTPUT) ./examples/$(FILE).c -lncurses -lm
 
+ncursesw: clean
+	$(CC) -o $(OUTPUT) ./examples/$(FILE).c -lncursesw -lm
+
+raylibx11: clean
+	$(CC) -o $(OUTPUT) ./examples/$(FILE).c -lraylib -lm -lX11
+
 all: clean
 	$(CC) -o $(OUTPUT) ./examples/$(FILE).c -lm
 
