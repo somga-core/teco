@@ -8,9 +8,7 @@ Here is what is done:
 
  - Unoptimized effects system
 
- - SDL2 and Ncurses integration
-
- - Raylib integration
+ - SDL2, Ncurses and Raylib integration
  
 Here are things that are not yet implemented:
 
@@ -34,14 +32,7 @@ Here are things about which we are not totaly sure about:
 
  - Declare several small function as "static inline"
 
- - Separate outline and fill arguments in functions that draw
-   primitives
-
  - Condence similar functions that manipulate palette, cache, bulb
    and draw image on screen
 
  - Add function to delete only one element from palette and bulb
-
- - Remove hex color codes cause they are useless
-
- - Invert behavour of space symbol in image files
