@@ -9,7 +9,6 @@
 #define TECO_LAYER_BITS 2
 #define TECO_LAYER_MASK 0b11
 #define TECO_DEFAULT_FILL "\0\0\0"
-
 #define TECO_S 0b01
 #define TECO_C 0b10
 #define TECO_E 0b11
@@ -21,6 +20,8 @@
 #define TECO_SCE 0b111001
 
 #define TECO_ALL 0b111001
+
+#define TECO_SQRT_2 1.41421
 
 typedef struct teco_image {
     unsigned width; unsigned height;
@@ -37,16 +38,17 @@ void teco_image_resize(teco_image* image, unsigned char new_layer_count, unsigne
 
 void teco_image_export(teco_image* image, char* path, char space_symbol);
 
-void teco_image_apply(teco_image* image_to_apply_on, teco_image* image_to_apply, unsigned char layers, long x, long y);
+void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layers, long x, long y);
 
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y);
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y);
+int teco_image_in_bounds(teco_image* image, long x, long y);
 
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
 void teco_image_hrect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
-void teco_image_circle(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
-void teco_image_hcircle(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2);
+void teco_image_circle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius);
+void teco_image_hcircle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius);
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters);
 
 void teco_image_print(teco_image* image, unsigned char layers);
@@ -61,14 +63,14 @@ void teco_image_print(teco_image* image, unsigned char layers);
 #include <SDL2/SDL_ttf.h>
 
 #define TECO_TEXTURE_TYPE SDL_Texture*
-#define TECO_RECTANGLE_TYPE SDL_Rect
+#define TECO_RECT_TYPE SDL_Rect
 #define TECO_COLOR_TYPE SDL_Color
-#define TECO_TEXTURE_DELETE_FUNCTION SDL_DestroyTexture
+#define TECO_TEXTURE_DELETE_FUNC SDL_DestroyTexture
 
 #ifdef TECO_RENDER_TEXT_SOLID
-#define TECO_RENDER_TEXT_FUNCTION TTF_RenderText_Solid
+#define TECO_RENDER_TEXT_FUNC TTF_RenderText_Solid
 #else
-#define TECO_RENDER_TEXT_FUNCTION TTF_RenderText_Blended
+#define TECO_RENDER_TEXT_FUNC TTF_RenderText_Blended
 #endif
 
 #elif defined(TECO_RAYLIB)
@@ -76,9 +78,9 @@ void teco_image_print(teco_image* image, unsigned char layers);
 #include <raylib.h>
 
 #define TECO_TEXTURE_TYPE RenderTexture2D
-#define TECO_RECTANGLE_TYPE Rectangle
+#define TECO_RECT_TYPE Rectangle
 #define TECO_COLOR_TYPE Color
-#define TECO_TEXTURE_DELETE_FUNCTION UnloadRenderTexture
+#define TECO_TEXTURE_DELETE_FUNC UnloadRenderTexture
 
 #endif
 
@@ -129,11 +131,11 @@ TECO_TEXTURE_TYPE teco_cache_get_texture(teco_cache* cache, unsigned short index
 
 #if defined(TECO_SDL2)
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, SDL_Rect draw_rect, TTF_Font* font, ...);
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TECO_RECT_TYPE draw_rect, TTF_Font* font, ...);
 
 #elif defined(TECO_RAYLIB)
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, teco_cache* cache, Rectangle draw_rect, Font font, ...);
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, teco_cache* cache, TECO_RECT_TYPE draw_rect, Font font, ...);
 
 #endif
 
@@ -186,14 +188,15 @@ teco_image teco_image_copy(teco_image* image, unsigned char layers) {
 };
 
 teco_image teco_image_import(char* path, unsigned char layer_count) {
+    FILE* file_stream = fopen(path, "r");
+    if (!file_stream) return teco_image_create(1, 0, 0);
+    
     unsigned width = 0, height = 0;
     char buffer;
-    // All "space" synbols in file will become spaces in image,
-    // all spaces in file will become '\0' in image
+    
     char space_symbol;
-    FILE* file_stream = fopen(path, "r");
-
-    if (!file_stream) return teco_image_create(1, 0, 0);
+    // All "space symbols" in file will become spaces in image,
+    // all spaces in file will become '\0' in image
 
     fscanf(file_stream, "%u %u %c", &width, &height, &space_symbol);
 
@@ -333,23 +336,155 @@ void teco_image_set(teco_image* image, unsigned char layer, char character, unsi
     image->data[image->width * image->height * (layer - 1) + image->width * y + x] = character;
 };
 
-void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long xl, long yu, long xr, long yd) {
-    if (xl < 0) xl = 0;
-    if (xr >= image->width) xr = image->width - 1;
-    if (yu < 0) yu = 0;
-    if (yd >= image->height) yd = image->height - 1;
+int teco_image_in_bounds(teco_image* image, long x, long y) {
+	return x >= 0 && y >= 0 && x < image->width && y < image->height;
+};
+
+void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2) {
+	long long_lenght = x2 - x1;
+	long short_lenght = y2 - y1;
+
+	char plot_along_x = 1;
+
+	if (labs(long_lenght) < labs(short_lenght)) {
+		long tmp = long_lenght;
+		long_lenght = short_lenght;
+		short_lenght = tmp;
+		plot_along_x = 0;
+	}
+
+	float step_along_short = (float) short_lenght / (float) long_lenght;
+	char step_along_long = 1;
+
+	if (long_lenght < 0) {step_along_long = -1; step_along_short = -step_along_short;}
+
+	long_lenght += step_along_long;
+
+	if (plot_along_x) {
+    	float y = .5 * step_along_long;
+    	for (long x = 0; x != long_lenght; x += step_along_long) {
+    		if (teco_image_in_bounds(image, x1 + x, y1 + (long) y))
+			    for (
+			        unsigned char char_index = 0, layer, shifted = layers;
+			        (layer = shifted & TECO_LAYER_MASK) != 0;
+			        shifted >>= TECO_LAYER_BITS
+			    ) {
+			    	teco_image_set(image, layer, characters[char_index], x1 + x, y1 + (long) y);
+					++char_index;
+			    }
+		    
+			y += step_along_short;
+    	}
+	} else {
+    	float x = .5 * step_along_long;
+    	for (long y = 0; y != long_lenght; y += step_along_long) {
+    		if (teco_image_in_bounds(image, x1 + (long) x, y1 + y))
+			    for (
+			        unsigned char char_index = 0, layer, shifted = layers;
+			        (layer = shifted & TECO_LAYER_MASK) != 0;
+			        shifted >>= TECO_LAYER_BITS
+			    ) {
+			    	teco_image_set(image, layer, characters[char_index], x1 + (long) x, y1 + y);
+					++char_index;
+			    }
+		    
+			x += step_along_short;
+    	}
+	}
+}
+
+void teco_image_rect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2) {
+	if (x1 > x2) {
+		long tmp = x1;
+		x1 = x2;
+		x2 = tmp;
+	}
+
+	if (x1 >= image->width || x2 < 0) return;
+	
+	if (y1 > y2) {
+		long tmp = y1;
+		y1 = y2;
+		y2 = tmp;
+	}
+	
+	if (y1 >= image->height || y2 < 0) return;
+
+    if (x1 < 0) x1 = 0;
+    if (x2 >= image->width) x2 = image->width - 1;
+    if (y1 < 0) y1 = 0;
+    if (y2 >= image->height) y2 = image->height - 1;
 
     for (
         unsigned char i = 0, layer, shifted = layers;
         (layer = shifted & TECO_LAYER_MASK) != 0;
         shifted >>= TECO_LAYER_BITS
     ) {
-        for (unsigned y = yu; y <= yd; y++)
-            for (unsigned x = xl; x <= xr; x++)
+        for (unsigned y = y1; y <= y2; y++)
+            for (unsigned x = x1; x <= x2; x++)
                 teco_image_set(image, layer, characters[i], x, y);
         
         i++;
     }
+};
+
+void teco_image_circle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius) {
+	for (long i = 0; i <= radius / TECO_SQRT_2 + 1; ++i) {
+		long max_j = sqrt(radius * radius - i * i);
+		
+		for (long j = 0; j <= max_j; ++j)
+			for (char im = -1; im < 3; im += 2) {
+				for (char jm = -1; jm < 3; jm += 2) {
+					// Grossy looking
+					long dx = x + im * i;
+					long dy = y + jm * j;
+					if (teco_image_in_bounds(image, dx, dy))
+					    for (
+					        unsigned char char_index = 0, layer, shifted = layers;
+					        (layer = shifted & TECO_LAYER_MASK) != 0;
+					        shifted >>= TECO_LAYER_BITS
+					    ) {teco_image_set(image, layer, characters[char_index], dx, dy); ++char_index;}
+
+					dx = x + jm * j;
+					dy = y + im * i;
+					if (teco_image_in_bounds(image, dx, dy))
+					    for (
+					        unsigned char char_index = 0, layer, shifted = layers;
+					        (layer = shifted & TECO_LAYER_MASK) != 0;
+					        shifted >>= TECO_LAYER_BITS
+					    ) {teco_image_set(image, layer, characters[char_index], dx, dy); ++char_index;}
+				}
+			}
+	}
+};
+
+void teco_image_hcircle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius) {
+	for (long i = 0; i <= radius / TECO_SQRT_2 + 1; ++i) {
+		long j = sqrt(radius * radius - i * i) + .5;
+
+		for (char im = -1; im < 3; im += 2) {
+			for (char jm = -1; jm < 3; jm += 2) {
+				// Grossy looking
+				long dx = x + im * i;
+				long dy = y + jm * j;
+				if (teco_image_in_bounds(image, dx, dy))
+				    for (
+				        unsigned char char_index = 0, layer, shifted = layers;
+				        (layer = shifted & TECO_LAYER_MASK) != 0;
+				        shifted >>= TECO_LAYER_BITS
+				    ) {teco_image_set(image, layer, characters[char_index], dx, dy); ++char_index;}
+					
+				dx = x + jm * j;
+				dy = y + im * i;
+				if (teco_image_in_bounds(image, dx, dy))
+				    for (
+				        unsigned char char_index = 0, layer, shifted = layers;
+				        (layer = shifted & TECO_LAYER_MASK) != 0;
+				        shifted >>= TECO_LAYER_BITS
+				    ) {teco_image_set(image, layer, characters[char_index], dx, dy); ++char_index;}
+			}
+		}
+	}
 };
 
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters) {
@@ -532,7 +667,7 @@ teco_cache teco_cache_create() {
 
 void teco_cache_delete(teco_cache* cache) {
     for (unsigned short index = 0; index < cache->size; index++) {
-        TECO_TEXTURE_DELETE_FUNCTION(cache->textures[index]);
+        TECO_TEXTURE_DELETE_FUNC(cache->textures[index]);
     }
 
     free(cache->textures);
@@ -564,13 +699,13 @@ TECO_TEXTURE_TYPE teco_cache_get_texture(teco_cache* cache, unsigned short index
 
 #if defined(TECO_SDL2)
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TECO_RECTANGLE_TYPE draw_rect, TTF_Font* font, ...) {
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TECO_RECT_TYPE draw_rect, TTF_Font* font, ...) {
     unsigned symbol_width = draw_rect.w / image->width;
     unsigned symbol_height = draw_rect.h / image->height;
 
 #elif defined(TECO_RAYLIB)
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, teco_cache* cache, TECO_RECTANGLE_TYPE draw_rect, Font font, ...) {
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, teco_cache* cache, TECO_RECT_TYPE draw_rect, Font font, ...) {
     unsigned symbol_width = draw_rect.width / image->width;
     unsigned symbol_height = draw_rect.height / image->height;
 
@@ -592,7 +727,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
             char symbol = teco_image_get(image, TECO_S, x, y);
             if (symbol == '\0' || symbol == ' ') continue;
 
-            TECO_RECTANGLE_TYPE symbol_rect = {
+            TECO_RECT_TYPE symbol_rect = {
                 draw_rect.x + symbol_width * x, draw_rect.y + symbol_height * y,
                 symbol_width, symbol_height
             };
@@ -645,7 +780,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
             	
                 render_text[0] = symbol;
                 
-                SDL_Surface* surface = TECO_RENDER_TEXT_FUNCTION(font, render_text, render_color);
+                SDL_Surface* surface = TECO_RENDER_TEXT_FUNC(font, render_text, render_color);
                 texture = SDL_CreateTextureFromSurface(renderer, surface);
 
                 teco_cache_add(cache, symbol, texture);
@@ -684,7 +819,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
 			
             DrawTexturePro(
             	texture.texture,
-            	(TECO_RECTANGLE_TYPE) {0, 0, texture.texture.width, -texture.texture.height},
+            	(TECO_RECT_TYPE) {0, 0, texture.texture.width, -texture.texture.height},
             	symbol_rect,
             	(Vector2) {0, 0}, 0.0f,
             	color

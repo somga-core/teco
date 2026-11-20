@@ -14,13 +14,21 @@ Here are things that are not yet implemented:
 
  - Ncursesw integration
 
- - More image drawing functions (draw_line, draw_circle, etc.)
+ - Draw holow rect function
 
  - Documentation embedded in a header
 
  - Sane name for a fucking bulb
 
+ - Fix tabulation
+
 Here are things about which we are not totaly sure about:
+
+ - Optimize circle and line drawing functions by implementing
+   Bresenham's algorithm
+
+ - Change all types to more memory-economic (no way you would want to
+   make an image with width of 4 billion symbols)
 
  - Turn palettes, caches and bulbs into hashmaps
 
@@ -33,5 +41,7 @@ Here are things about which we are not totaly sure about:
  - Declare several small function as "static inline"
 
  - Condence similar functions that manipulate palette, cache and bulb
+
+ - Fix repetition of code that iterates layers
 
  - Add function to delete only one element from palette and bulb

@@ -31,10 +31,33 @@ int main(int argc, char *argv[]) {
 
     teco_image_export(&background, "examples/temp/export.tci", ':');
 
+    teco_image primitives = teco_image_create(3, 40, 20);
+
+    teco_image_fill(&primitives, TECO_SCE, "\"^'");
+    teco_image_rect(&primitives, TECO_SCE, "@#$", 9, 5, -100, 100);
+    teco_image_hcircle(&primitives, TECO_SCE, "*&!", 15, 4, 4);
+    teco_image_circle(&primitives, TECO_SCE, "*&!", 39, 11, 6);
+    
+    teco_image_line(&primitives, TECO_C, "a", 0, 19, 39, 0);
+    teco_image_line(&primitives, TECO_C, "b", 10, 19, 39, 0);
+    teco_image_line(&primitives, TECO_C, "c", 20, 19, 39, 0);
+    teco_image_line(&primitives, TECO_C, "d", 30, 19, 39, 0);
+    teco_image_line(&primitives, TECO_C, "e", 39, 19, 39, 0);
+    
+    teco_image_line(&primitives, TECO_E, " ", 0, 19, 0, 0);
+    teco_image_line(&primitives, TECO_E, " ", 10, 19, 0, 0);
+    teco_image_line(&primitives, TECO_E, " ", 20, 19, 0, 0);
+    teco_image_line(&primitives, TECO_E, " ", 30, 19, 0, 0);
+    teco_image_line(&primitives, TECO_E, " ", 39, 19, 0, 0);
+        
+    printf("primitives:\n");
+    teco_image_print(&primitives, TECO_SCE);
+
     teco_image_delete(&image1);
     teco_image_delete(&image2);
     teco_image_delete(&background);
     teco_image_delete(&object);
+    teco_image_delete(&primitives);
 
     return 0;
 }
