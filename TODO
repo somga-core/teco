@@ -32,7 +32,6 @@ Here are things about which we are not totaly sure about:
 
  - Declare several small function as "static inline"
 
- - Condence similar functions that manipulate palette, cache, bulb
-   and draw image on screen
+ - Condence similar functions that manipulate palette, cache and bulb
 
  - Add function to delete only one element from palette and bulb

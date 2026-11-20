@@ -61,12 +61,14 @@ void teco_image_print(teco_image* image, unsigned char layers);
 #include <SDL2/SDL_ttf.h>
 
 #define TECO_TEXTURE_TYPE SDL_Texture*
+#define TECO_RECTANGLE_TYPE SDL_Rect
+#define TECO_COLOR_TYPE SDL_Color
 #define TECO_TEXTURE_DELETE_FUNCTION SDL_DestroyTexture
 
 #ifdef TECO_RENDER_TEXT_SOLID
-#define TECO_RENDER_TEXT TTF_RenderText_Solid
+#define TECO_RENDER_TEXT_FUNCTION TTF_RenderText_Solid
 #else
-#define TECO_RENDER_TEXT TTF_RenderText_Blended
+#define TECO_RENDER_TEXT_FUNCTION TTF_RenderText_Blended
 #endif
 
 #elif defined(TECO_RAYLIB)
@@ -74,6 +76,8 @@ void teco_image_print(teco_image* image, unsigned char layers);
 #include <raylib.h>
 
 #define TECO_TEXTURE_TYPE RenderTexture2D
+#define TECO_RECTANGLE_TYPE Rectangle
+#define TECO_COLOR_TYPE Color
 #define TECO_TEXTURE_DELETE_FUNCTION UnloadRenderTexture
 
 #endif
@@ -560,9 +564,17 @@ TECO_TEXTURE_TYPE teco_cache_get_texture(teco_cache* cache, unsigned short index
 
 #if defined(TECO_SDL2)
 
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, SDL_Rect draw_rect, TTF_Font* font, ...) {
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, SDL_Renderer* renderer, teco_cache* cache, TECO_RECTANGLE_TYPE draw_rect, TTF_Font* font, ...) {
     unsigned symbol_width = draw_rect.w / image->width;
     unsigned symbol_height = draw_rect.h / image->height;
+
+#elif defined(TECO_RAYLIB)
+
+void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, teco_cache* cache, TECO_RECTANGLE_TYPE draw_rect, Font font, ...) {
+    unsigned symbol_width = draw_rect.width / image->width;
+    unsigned symbol_height = draw_rect.height / image->height;
+
+#endif
     
     va_list effect_args;
 
@@ -570,8 +582,8 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
         va_start(effect_args, font);
     }
     
-    unsigned char red = 255, green = 255, blue = 255;
-    SDL_Color render_color = {255, 255, 255};
+    TECO_COLOR_TYPE color = {255, 255, 255, 255};
+    TECO_COLOR_TYPE render_color = {255, 255, 255, 255};
 
     for (unsigned y = 0; y < image->height; y++) {
         for (unsigned x = 0; x < image->width; x++) {
@@ -580,91 +592,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
             char symbol = teco_image_get(image, TECO_S, x, y);
             if (symbol == '\0' || symbol == ' ') continue;
 
-            SDL_Rect symbol_rect = {
-                draw_rect.x + symbol_width * x, draw_rect.y + symbol_height * y,
-                symbol_width, symbol_height
-            };
-
-            if (image->layer_count >= 2) {
-                char color_char = teco_image_get(image, TECO_C, x, y);
-                if (color_char != '\0') {
-                    unsigned short color_index = teco_palette_get_index(palette, color_char);
-                    if (color_index != palette->size)
-                        teco_palette_get_color(
-                            palette, color_index,
-                            &red, &green, &blue
-                        );
-                }
-
-                if (image->layer_count >= 3) {
-                    char effect_char = teco_image_get(image, TECO_E, x, y);
-        
-                    if (effect_char != '\0') {
-                        unsigned short effect_index = teco_bulb_get_index(bulb, effect_char);
-        
-                        if (effect_index != bulb->size) {
-                            teco_effect effect = teco_bulb_get_effect(bulb, effect_index);
-        
-                            float dx = 0, dy = 0, scale_x = 1, scale_y = 1;
-                            
-                            va_list effect_args_temp;
-                            va_copy(effect_args_temp, effect_args);
-                            effect(&dx, &dy, &scale_x, &scale_y, x, y, effect_args_temp);
-        
-                            symbol_rect.x += symbol_width * (dx + (1 - scale_x) * .5);
-                            symbol_rect.y += symbol_height * (dy + (1 - scale_y) * .5);
-                            symbol_rect.w *= scale_x;
-                            symbol_rect.h *= scale_y;
-                        }
-                    }
-                }
-            }
-
-            unsigned short texture_index = teco_cache_get_index(cache, symbol);
-            SDL_Texture* texture;
-            if (texture_index == cache->size) {
-                render_text[0] = symbol;
-                
-                SDL_Surface* surface = TECO_RENDER_TEXT(font, render_text, render_color);
-                texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-                teco_cache_add(cache, symbol, texture);
-
-                SDL_FreeSurface(surface);
-            } else {
-                texture = teco_cache_get_texture(cache, texture_index);
-            }
-
-            SDL_SetTextureColorMod(texture, red, green, blue);
-
-            SDL_RenderCopy(renderer, texture, NULL, &symbol_rect);
-        }
-    }
-
-    va_end(effect_args);
-};
-
-#elif defined(TECO_RAYLIB)
-
-void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, teco_cache* cache, Rectangle draw_rect, Font font, ...) {
-	unsigned symbol_width = draw_rect.width / image->width;
-    unsigned symbol_height = draw_rect.height / image->height;
-    
-    va_list effect_args;
-
-    if (image->layer_count >= 3) {
-        va_start(effect_args, font);
-    }
-    
-    Color color = {255, 255, 255, 255};
-    Color render_color = {255, 255, 255, 255};
-
-    for (unsigned y = 0; y < image->height; y++) {
-        for (unsigned x = 0; x < image->width; x++) {
-            char symbol = teco_image_get(image, TECO_S, x, y);
-            if (symbol == '\0' || symbol == ' ') continue;
-
-            Rectangle symbol_rect = {
+            TECO_RECTANGLE_TYPE symbol_rect = {
                 draw_rect.x + symbol_width * x, draw_rect.y + symbol_height * y,
                 symbol_width, symbol_height
             };
@@ -697,17 +625,35 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
         
                             symbol_rect.x += symbol_width * (dx + (1 - scale_x) * .5);
                             symbol_rect.y += symbol_height * (dy + (1 - scale_y) * .5);
+                            
+                            #if defined(TECO_SDL2)
+                            symbol_rect.w *= scale_x;
+                            symbol_rect.h *= scale_y;
+                            #elif defined(TECO_RAYLIB)
                             symbol_rect.width *= scale_x;
                             symbol_rect.height *= scale_y;
+                            #endif
                         }
                     }
                 }
             }
 
             unsigned short texture_index = teco_cache_get_index(cache, symbol);
-            RenderTexture2D texture;
-            
+            TECO_TEXTURE_TYPE texture;
             if (texture_index == cache->size) {
+            	#if defined(TECO_SDL2)
+            	
+                render_text[0] = symbol;
+                
+                SDL_Surface* surface = TECO_RENDER_TEXT_FUNCTION(font, render_text, render_color);
+                texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+                teco_cache_add(cache, symbol, texture);
+
+                SDL_FreeSurface(surface);
+                
+                #elif defined(TECO_RAYLIB)
+
 			    int glyph_index = GetGlyphIndex(font, symbol);
 			    
             	texture = LoadRenderTexture(
@@ -723,18 +669,33 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
         		EndTextureMode();
 
                 teco_cache_add(cache, symbol, texture);
+
+                #endif
             } else {
                 texture = teco_cache_get_texture(cache, texture_index);
             }
 
-            DrawTexturePro(texture.texture, (Rectangle) {0, 0, texture.texture.width, -texture.texture.height}, symbol_rect, (Vector2) {0, 0}, 0.0f, color);
+			#if defined(TECO_SDL2)
+			
+            SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
+            SDL_RenderCopy(renderer, texture, NULL, &symbol_rect);
+
+            #elif defined(TECO_RAYLIB)
+			
+            DrawTexturePro(
+            	texture.texture,
+            	(TECO_RECTANGLE_TYPE) {0, 0, texture.texture.width, -texture.texture.height},
+            	symbol_rect,
+            	(Vector2) {0, 0}, 0.0f,
+            	color
+            );
+
+            #endif
         }
     }
-    
+
     va_end(effect_args);
 };
-
-#endif
 
 #elif defined(TECO_NCURSES) || defined(TECO_NCURSESW)
 
