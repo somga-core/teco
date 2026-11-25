@@ -9,9 +9,9 @@ SUPPORTED LIBRARIES
 
 Here are libs that are supproted:
 
- - SDL2: https://www.libsdl.org
+ - SDL2: https://libsdl.org
 
- - Raylib: https://www.raylib.com
+ - Raylib: https://raylib.com
 
  - Ncurses: https://invisible-island.net/ncurses
 
