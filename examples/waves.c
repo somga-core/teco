@@ -23,10 +23,10 @@ typedef struct voronoi_dot {
 
 void effect_wave(float* dx, float* dy, float* scale_x, float* scale_y, unsigned x, unsigned y, va_list args) {
 	float time = va_arg(args, double);
-    *dy = sin(x / 2. + y / 1.5 + time) / 4 + sin(x / 9. + y / 2 + time / 2) / 2 + sin(x + y + time * 4) / 20;
+	*dy = sin(x / 2. + y / 1.5 + time) / 4 + sin(x / 9. + y / 2 + time / 2) / 2 + sin(x + y + time * 4) / 20;
 }
 
-// WARNING: Close your eyes and don't open them while reading this function
+// Close your eyes and don't open them while reading this function
 // This is the grossiest implementation of voronoi nose
 void voronoi_generate(teco_image* image, voronoi_dot dots[VORONOI_DOT_COUNT]) {
 	for (unsigned y = 0; y < image->height; ++y) {
@@ -78,23 +78,23 @@ void voronoi_change_dots_directions(voronoi_dot dots[VORONOI_DOT_COUNT]) {
 
 int main() {
 	// Raylib stuff
-    InitWindow(640, 480, "Waves effect");
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
-    
+	InitWindow(640, 480, "Waves effect");
+	SetWindowState(FLAG_WINDOW_RESIZABLE);
+	
 	SetTargetFPS(60);
 	
 	Font font = LoadFontEx("examples/assets/font.ttf", 50, 0, 0);
-    Rectangle window_rect = {0, 0, 0, 0};
+	Rectangle window_rect = {0, 0, 0, 0};
 
 	// TeCo stuff
-    teco_image image = teco_image_create(3, 50, 25);
+	teco_image image = teco_image_create(3, 50, 25);
 	teco_image_fill(&image, TECO_CE, "6~");
-    
-    teco_palette palette = teco_palette_import("examples/assets/core.tcp");
-    teco_cache cache = teco_cache_create();    
-    teco_bulb bulb = teco_bulb_create();
-    teco_bulb_set(&bulb, '~', &effect_wave);
-    
+	
+	teco_palette palette = teco_palette_import("examples/assets/core.tcp");
+		teco_cache cache = teco_cache_create();
+	teco_bulb bulb = teco_bulb_create();
+	teco_bulb_set(&bulb, '~', &effect_wave);
+	
 	// Generate dots for voronoi noise
 	srand(10);
 	
@@ -109,10 +109,10 @@ int main() {
 	
 	float time_accumulator = 0;
 	
-    // Mainloop
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-            ClearBackground((Color) {19, 68, 125, 0x00});
+	// Mainloop
+	while (!WindowShouldClose()) {
+		BeginDrawing();
+			ClearBackground((Color) {19, 68, 125, 0x00});
 
 			window_rect.width = GetScreenWidth();
 			window_rect.height = GetScreenHeight();
@@ -129,18 +129,18 @@ int main() {
 			voronoi_generate(&image, dots);
 			
 			teco_image_draw(&image, &palette, &bulb, &cache, window_rect, font, GetTime());
-        EndDrawing();
-    }
+		EndDrawing();
+	}
 
 	// Cleaning that is technically not neccesary
-    UnloadFont(font);
+	UnloadFont(font);
 
-    teco_image_delete(&image);
-    teco_palette_delete(&palette);
-    teco_bulb_delete(&bulb);
-    teco_cache_delete(&cache);
+	teco_image_delete(&image);
+	teco_palette_delete(&palette);
+	teco_bulb_delete(&bulb);
+	teco_cache_delete(&cache);
 
-    CloseWindow();
+	CloseWindow();
 
-    return 0;
+	return 0;
 }
