@@ -27,7 +27,10 @@ Here are things about which we are not totaly sure about:
  - Optimize circle and line drawing functions by implementing
    Bresenham's algorithm
 
- - Replace ugly layer iterations with macro
+ - Replace ugly layer iterations with macro and overall add more
+   shotcuts (like min and max functions)
+
+ - Declare several small function as "static inline" or as macros
 
  - Change all types to more memory-economic (no way you would want to
    make an image with width of 4 billion symbols)
@@ -40,10 +43,6 @@ Here are things about which we are not totaly sure about:
  - Effect arguments as a separate layer or some other improvment of
    effects system in a similar way
 
- - Declare several small function as "static inline"
-
  - Condence similar functions that manipulate palette, cache and bulb
-
- - Fix repetition of code that iterates layers
 
  - Add function to delete only one element from palette and bulb
