@@ -49,6 +49,12 @@ int main(int argc, char *argv[]) {
     teco_image_line(&primitives, TECO_E, " ", 20, 19, 0, 0);
     teco_image_line(&primitives, TECO_E, " ", 30, 19, 0, 0);
     teco_image_line(&primitives, TECO_E, " ", 39, 19, 0, 0);
+    
+    teco_image_hrect(&primitives, TECO_S, "!", 2, 2, 100, 100);
+    teco_image_hrect(&primitives, TECO_S, "@", 3, 3, 3, 3);
+    teco_image_hrect(&primitives, TECO_S, ".", -200, -200, 30, 10);
+    teco_image_hrect(&primitives, TECO_S, "&", 15, 7, 20, 12);
+    teco_image_hrect(&primitives, TECO_S, "!", 100, 100, 100, 100);
         
     printf("primitives:\n");
     teco_image_print(&primitives, TECO_SCE);

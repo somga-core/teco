@@ -14,7 +14,7 @@ Here are things that are not yet implemented:
 
  - Ncursesw integration
 
- - Draw holow rect function
+ - Algorithm optimizations
 
  - Documentation embedded in a header
 
@@ -26,6 +26,8 @@ Here are things about which we are not totaly sure about:
 
  - Optimize circle and line drawing functions by implementing
    Bresenham's algorithm
+
+ - Replace ugly layer iterations with macro
 
  - Change all types to more memory-economic (no way you would want to
    make an image with width of 4 billion symbols)

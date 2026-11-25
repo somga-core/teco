@@ -428,6 +428,49 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
     }
 };
 
+void teco_image_hrect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2) {
+	if (x1 > x2) {
+		long tmp = x1;
+		x1 = x2;
+		x2 = tmp;
+	}
+
+	if (x1 >= image->width || x2 < 0) return;
+	
+	if (y1 > y2) {
+		long tmp = y1;
+		y1 = y2;
+		y2 = tmp;
+	}
+	
+	if (y1 >= image->height || y2 < 0) return;
+
+	char draw_top = 1, draw_bottom = 1, draw_left = 1, draw_right = 1;
+
+	if (x1 < 0) {draw_left = 0; x1 = 0;}
+	if (x2 >= image->width) {draw_right = 0; x2 = image->width - 1;}
+	if (y1 < 0) {draw_top = 0; y1 = 0;}
+	if (y2 >= image->height) {draw_bottom = 0; y2 = image->height - 1;}
+
+	for (
+        unsigned char i = 0, layer, shifted = layers;
+        (layer = shifted & TECO_LAYER_MASK) != 0;
+        shifted >>= TECO_LAYER_BITS
+    ) {
+		if (draw_left) for (unsigned y = y1; y <= y2; ++y)
+			teco_image_set(image, layer, characters[i], x1, y);
+			
+		if (draw_right) for (unsigned y = y1; y <= y2; ++y)
+			teco_image_set(image, layer, characters[i], x2, y);
+			
+		if (draw_top) for (unsigned x = x1; x <= x2; ++x)
+			teco_image_set(image, layer, characters[i], x, y1);
+			
+		if (draw_bottom) for (unsigned x = x1; x <= x2; ++x)
+			teco_image_set(image, layer, characters[i], x, y2);
+    }
+};
+
 void teco_image_circle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius) {
 	for (long i = 0; i <= radius / TECO_SQRT_2 + 1; ++i) {
 		long max_j = sqrt(radius * radius - i * i);
