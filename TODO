@@ -18,6 +18,8 @@ Here are things that are not yet implemented:
 
  - Documentation embedded in a header and comments in examples
 
+ - Remove semicolons after functions
+
  - Sane name for a fucking bulb
 
 Here are things about which we are not totaly sure about:
