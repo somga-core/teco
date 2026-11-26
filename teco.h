@@ -177,7 +177,7 @@ teco_image teco_image_create(unsigned char layer_count, unsigned width, unsigned
 	teco_image_fill(&image, TECO_ALL & (unsigned) (pow(TECO_LAYER_MASK + 1, layer_count) - 1), TECO_DEFAULT_FILL);
 
 	return image;
-};
+}
 
 teco_image teco_image_copy(teco_image* image, unsigned char layers) {
 	teco_image new_image = teco_image_create(image->layer_count, image->width, image->height);
@@ -195,7 +195,7 @@ teco_image teco_image_copy(teco_image* image, unsigned char layers) {
 	}
 
 	return new_image;
-};
+}
 
 teco_image teco_image_import(char* path, unsigned char layer_count) {
 	FILE* file_stream = fopen(path, "r");
@@ -210,7 +210,7 @@ teco_image teco_image_import(char* path, unsigned char layer_count) {
 
 	fscanf(file_stream, "%u %u %c", &width, &height, &space_symbol);
 
-	while (getc(file_stream) != '\n') {};
+	while (getc(file_stream) != '\n') {}
 
 	teco_image image = teco_image_create(layer_count, width, height);
 
@@ -234,14 +234,14 @@ teco_image teco_image_import(char* path, unsigned char layer_count) {
 teco_image_import_end:
 	fclose(file_stream);
 	return image;
-};
+}
 
 void teco_image_delete(teco_image* image) {
 	free(image->data);
 
 	image->width = 0;
 	image->height = 0;
-};
+}
 
 void teco_image_resize(teco_image* image, unsigned char new_layer_count, unsigned new_width, unsigned new_height) {
 	teco_image new_image = teco_image_create(new_layer_count, new_width, new_height);
@@ -254,7 +254,7 @@ void teco_image_resize(teco_image* image, unsigned char new_layer_count, unsigne
 	teco_image_delete(image);
 
 	*image = new_image;
-};
+}
 
 void teco_image_export(teco_image* image, char* path, char space_symbol) {
 	FILE* file_stream = fopen(path, "w");
@@ -280,7 +280,7 @@ void teco_image_export(teco_image* image, char* path, char space_symbol) {
 	}
 	
 	fclose(file_stream);
-};
+}
 
 void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layers, long x, long y) {
 	if (
@@ -332,19 +332,19 @@ void teco_image_apply(teco_image* canvas, teco_image* image, unsigned char layer
 			}
 		}
 	}
-};
+}
 
 char teco_image_get(teco_image* image, unsigned char layer, unsigned x, unsigned y) {
 	return image->data[image->width * image->height * (layer - 1) + image->width * y + x];
-};
+}
 
 void teco_image_set(teco_image* image, unsigned char layer, char character, unsigned x, unsigned y) {
 	image->data[image->width * image->height * (layer - 1) + image->width * y + x] = character;
-};
+}
 
 int teco_image_get_in_bounds(teco_image* image, long x, long y) {
 	return x >= 0 && y >= 0 && x < image->width && y < image->height;
-};
+}
 
 void teco_image_line(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2) {
 	long long_lenght = x2 - x1;
@@ -404,7 +404,7 @@ void teco_image_rect(teco_image* image, unsigned char layers, char* characters, 
 		for (unsigned y = y1; y <= y2; y++)
 			for (unsigned x = x1; x <= x2; x++)
 				teco_image_set(image, layer, characters[char_index], x, y);
-};
+}
 
 void teco_image_hrect(teco_image* image, unsigned char layers, char* characters, long x1, long y1, long x2, long y2) {
 	if (x1 > x2) TECO_SWAP(long, x1, x2)
@@ -437,7 +437,7 @@ void teco_image_hrect(teco_image* image, unsigned char layers, char* characters,
 	if (draw_bottom) for (unsigned x = x1; x <= x2; ++x)
 		TECO_FOR_LAYERS_CHARS(layers, layer, char_index)
 			teco_image_set(image, layer, characters[char_index], x, y2);
-};
+}
 
 void teco_image_circle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius) {
 	for (long i = 0; i <= radius / TECO_SQRT_2 + 1; ++i) {
@@ -461,7 +461,7 @@ void teco_image_circle(teco_image* image, unsigned char layers, char* characters
 				}
 			}
 	}
-};
+}
 
 void teco_image_hcircle(teco_image* image, unsigned char layers, char* characters, long x, long y, unsigned radius) {
 	for (long i = 0; i <= radius / TECO_SQRT_2 + 1; ++i) {
@@ -484,14 +484,14 @@ void teco_image_hcircle(teco_image* image, unsigned char layers, char* character
 			}
 		}
 	}
-};
+}
 
 void teco_image_fill(teco_image* image, unsigned char layers, char* characters) {
 	TECO_FOR_LAYERS_CHARS(layers, layer, char_index)
 		for (unsigned y = 0; y < image->height; y++)
 			for (unsigned x = 0; x < image->width; x++)
 				teco_image_set(image, layer, characters[char_index], x, y);
-};
+}
 
 void teco_image_print(teco_image* image, unsigned char layers) {
 	TECO_FOR_LAYERS(layers, layer) {
@@ -508,7 +508,7 @@ void teco_image_print(teco_image* image, unsigned char layers) {
 		}
 		printf("\n");
 	}
-};
+}
 
 #if defined(TECO_SDL2) || defined(TECO_RAYLIB)
 
@@ -538,7 +538,7 @@ teco_palette teco_palette_import(char* path) {
 	fclose(file_stream);
 
 	return palette;
-};
+}
 
 teco_palette teco_palette_create() {
 	teco_palette palette = {.size=0, .colors=NULL};
@@ -548,14 +548,14 @@ teco_palette teco_palette_create() {
 	}
 
 	return palette;
-};
+}
 
 void teco_palette_delete(teco_palette* palette) {
 	free(palette->colors);
 
 	palette->size = 0;
 	palette->colors = NULL;
-};
+}
 
 void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char red, unsigned char green, unsigned char blue) {
 	unsigned short color_index;
@@ -576,7 +576,7 @@ void teco_palette_set_rgb(teco_palette* palette, char character, unsigned char r
 	palette->colors[color_index] = red;
 	palette->colors[color_index + 1] = green;
 	palette->colors[color_index + 2] = blue;
-};
+}
 
 void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
 	unsigned short red, green, blue;
@@ -584,14 +584,14 @@ void teco_palette_set_hex(teco_palette* palette, char character, char* hex) {
 	sscanf(hex, "#%2hx%2hx%2hx", &red, &green, &blue);
 
 	teco_palette_set_rgb(palette, character, red, green, blue);
-};
+}
 
 unsigned short teco_palette_get_index(teco_palette* palette, char character) {
 	unsigned short index = palette->indices[(unsigned char) character];
 
 	if (index == 255) return palette->size;
 	return index;
-};
+}
 
 void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigned char* red, unsigned char* green, unsigned char* blue) {
 	unsigned short color_index = index * 3;
@@ -599,7 +599,7 @@ void teco_palette_get_color(teco_palette* palette, unsigned short index, unsigne
 	*red = palette->colors[color_index];
 	*green = palette->colors[color_index + 1];
 	*blue = palette->colors[color_index + 2];
-};
+}
 
 teco_bulb teco_bulb_create() {
 	teco_bulb bulb = {.size=0, .effects=NULL};
@@ -609,14 +609,14 @@ teco_bulb teco_bulb_create() {
 	}
 
 	return bulb;
-};
+}
 
 void teco_bulb_delete(teco_bulb* bulb) {
 	free(bulb->effects);
 
 	bulb->size = 0;
 	bulb->effects = NULL;
-};
+}
 
 void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect) {
 	unsigned short index = teco_bulb_get_index(bulb, character);
@@ -630,18 +630,18 @@ void teco_bulb_set(teco_bulb* bulb, char character, teco_effect effect) {
 	}
 
 	bulb->effects[index] = effect;
-};
+}
 
 unsigned short teco_bulb_get_index(teco_bulb* bulb, char character) {
 	unsigned short index = bulb->indices[(unsigned char) character];
 
 	if (index == 255) return bulb->size;
 	return index;
-};
+}
 
 teco_effect teco_bulb_get_effect(teco_bulb* bulb, unsigned short index) {
 	return bulb->effects[index];
-};
+}
 
 teco_cache teco_cache_create() {
 	teco_cache cache = {.size=0, .textures=NULL};
@@ -651,7 +651,7 @@ teco_cache teco_cache_create() {
 	}
 
 	return cache;
-};
+}
 
 void teco_cache_delete(teco_cache* cache) {
 	for (unsigned short index = 0; index < cache->size; index++) {
@@ -662,7 +662,7 @@ void teco_cache_delete(teco_cache* cache) {
 
 	cache->size = 0;
 	cache->textures = NULL;
-};
+}
 
 void teco_cache_add(teco_cache* cache, char symbol, TECO_TEXTURE texture) {
 	cache->indices[(unsigned char) symbol] = cache->size;
@@ -672,18 +672,18 @@ void teco_cache_add(teco_cache* cache, char symbol, TECO_TEXTURE texture) {
 	cache->textures = realloc(cache->textures, cache->size * sizeof(TECO_TEXTURE));
 
 	cache->textures[cache->size - 1] = texture;
-};
+}
 
 unsigned short teco_cache_get_index(teco_cache* cache, char symbol) {
 	unsigned short index = cache->indices[(unsigned char) symbol];
 
 	if (index == 255) return cache->size;
 	return index;
-};
+}
 
 TECO_TEXTURE teco_cache_get_texture(teco_cache* cache, unsigned short index) {
 	return cache->textures[index];
-};
+}
 
 #if defined(TECO_SDL2)
 
@@ -818,7 +818,7 @@ void teco_image_draw(teco_image* image, teco_palette* palette, teco_bulb* bulb, 
 	}
 
 	va_end(effect_args);
-};
+}
 
 #elif defined(TECO_NCURSES) || defined(TECO_NCURSESW)
 
@@ -841,7 +841,7 @@ void teco_image_draw(teco_image* image, unsigned dx, unsigned dy) {
 			}
 		}
 	}
-};
+}
 
 void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, unsigned dy) {
 	for (unsigned y = 0; y < image->height; y++) {
@@ -862,7 +862,7 @@ void teco_image_draw_on_window(teco_image* image, WINDOW* window, unsigned dx, u
 			}
 		}
 	}
-};
+}
 
 void teco_palette_import(char* path, short start) {
 	FILE* file_stream = fopen(path, "r");
@@ -890,7 +890,7 @@ void teco_palette_import(char* path, short start) {
 	}
 	
 	fclose(file_stream);
-};
+}
 
 #endif
 
